@@ -42,12 +42,17 @@ protected:
 
   // Preprocessor definitions.
   std::vector<std::string> Defines;
+  
+  // Undefined Preprocessor definitions
+  std::vector<std::string> Undefines;
 
   // Unrecognized flags that get no special handling.
   cmStdString FlagString;
 
   bool DoingDefine;
+  bool DoingUndefine;
   bool AllowDefine;
+  bool AllowUndefine;
   bool AllowSlash;
   enum { FlagTableCount = 16 };
   cmIDEFlagTable const* FlagTable[FlagTableCount];

@@ -459,6 +459,10 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"DisableSpecificWarnings", "wd", "Disable specific warnings", "",
    cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
 
+  // Pdb file related options
+  {"ProgramDataBaseFileName", "Fd", "Program Database File Name", "", 
+  cmVS7FlagTable::UserValue},
+
   // Precompiled header and related options.  Note that the
   // UsePrecompiledHeader entries are marked as "Continue" so that the
   // corresponding PrecompiledHeaderThrough entry can be found.
@@ -834,6 +838,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"\n";
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
+  targetOptions.OutputUndefinePreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
   if(targetBuilds)
@@ -868,6 +873,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // add the -D flags to the RC tool
   fout << "\"";
   targetOptions.OutputPreprocessorDefinitions(fout, "\n\t\t\t\t", "", "RC");
+  targetOptions.OutputUndefinePreprocessorDefinitions(fout, "\n\t\t\t\t","", "RC");
   fout << "/>\n";
   tool = "VCMIDLTool";
   if(this->FortranProject)
@@ -1703,6 +1709,9 @@ void cmLocalVisualStudio7Generator
             fileOptions.OutputPreprocessorDefinitions(fout,
                                                       "\t\t\t\t\t", "\n",
                                                       lang);
+            fileOptions.OutputUndefinePreprocessorDefinitions(fout,
+                                                              "\t\t\t\t\t",
+                                                              "\n", lang);
             }
           if(!fc.AdditionalDeps.empty())
             {

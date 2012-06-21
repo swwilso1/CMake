@@ -51,11 +51,22 @@ public:
   bool UsingSBCS();
 
   bool IsDebug();
+
+  // Check for pdb file name passed as argument.
+  bool HasPDBName();
+
+  // Get pdb file name.
+  std::string GetPDBName();
+
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout,
                                      const char* prefix,
                                      const char* suffix,
                                      const char* lang);
+  void OutputUndefinePreprocessorDefinitions(std::ostream& fout,
+                                             const char* prefix,
+                                             const char* suffix,
+                                             const char* lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
   void OutputAdditionalOptions(std::ostream& fout,
                                const char* prefix,

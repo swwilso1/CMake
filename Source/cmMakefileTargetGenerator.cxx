@@ -534,6 +534,9 @@ cmMakefileTargetGenerator
   langFlags += "_FLAGS)";
   this->LocalGenerator->AppendFlags(flags, langFlags.c_str());
 
+  bool hasCommandLinePDBFile = false;
+  std::string commandLinePDBFile;
+
   // Add target-specific flags.
   if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
@@ -564,6 +567,27 @@ cmMakefileTargetGenerator
       this->LocalGenerator->AppendFlags
         (flags, this->Target->GetProperty("COMPILE_FLAGS"));
       }
+
+#if defined(_WIN32)
+	// Now we need to search the command line flags for
+	// a given PDB file: 
+	{
+	std::vector<std::string> args;
+	cmSystemTools::ParseWindowsCommandLine(
+        flags.c_str(),
+        args);
+	for(std::vector<std::string>::iterator i = args.begin();
+		i != args.end(); ++i)
+      {
+	  if(((*i).length() > 3) && (*i)[0] == '/' && 
+		  (*i)[1] == 'F' && (*i)[2] == 'd')
+	    {
+        hasCommandLinePDBFile = true;
+		commandLinePDBFile = (*i).substr(3,std::string::npos);
+	    }
+      }
+    }
+#endif
     }
 
   // Add Fortran format flags.
@@ -659,7 +683,7 @@ cmMakefileTargetGenerator
   vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
   vars.CMTarget = this->Target;
   vars.Language = lang;
-  vars.TargetPDB = targetOutPathPDB.c_str();
+  vars.TargetPDB = hasCommandLinePDBFile ? commandLinePDBFile.c_str() : targetOutPathPDB.c_str();
   vars.Source = sourceFile.c_str();
   std::string shellObj =
     this->Convert(obj.c_str(),

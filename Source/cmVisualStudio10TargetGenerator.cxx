@@ -993,6 +993,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream,
                                               "      ", "\n", lang);
+      clOptions.OutputUndefinePreprocessorDefinitions(*this->BuildFileStream,
+                                              "      ", "\n", lang);
       }
     }
   return hasFlags;
@@ -1273,11 +1275,13 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
+  clOptions.OutputUndefinePreprocessorDefinitions(*this->BuildFileStream, 
+                                "      ", "\n", "CXX");
   this->WriteString("<AssemblerListingLocation>", 3);
   *this->BuildFileStream << configName
                          << "</AssemblerListingLocation>\n";
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
-  if(this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
+  if(! clOptions.HasPDBName())
     {
     this->WriteString("<ProgramDataBaseFileName>", 3);
     *this->BuildFileStream << this->Target->GetPDBDirectory(configName.c_str())
@@ -1311,6 +1315,8 @@ WriteRCOptions(std::string const& configName,
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "RC");
+  clOptions.OutputUndefinePreprocessorDefinitions(*this->BuildFileStream, 
+                                "      ", "\n", "RC");
   this->OutputIncludes(includes);
   this->WriteString("</ResourceCompile>\n", 2);
 }
@@ -1511,6 +1517,18 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   std::string imLib = this->Target->GetDirectory(config.c_str(), true);
   imLib += "/";
   imLib += targetNameImport;
+
+  std::string pdb;
+  Options& clOptions = *(this->ClOptions[config]);
+  if(clOptions.HasPDBName())
+    {
+    pdb = clOptions.GetPDBName();
+    }
+  else
+    {
+    pdb = dir;
+    pdb += targetNamePDB;
+    }
 
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
