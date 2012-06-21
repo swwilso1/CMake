@@ -1823,7 +1823,8 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar.c_str());
-    if(!archs.empty() && lang && (lang[0] =='C' || lang[0] == 'F'))
+    if(!archs.empty() && lang && (lang[0] =='C' || lang[0] == 'F' || 
+      lang[0] == 'O'))
       {
       for(std::vector<std::string>::iterator i = archs.begin();
           i != archs.end(); ++i)
