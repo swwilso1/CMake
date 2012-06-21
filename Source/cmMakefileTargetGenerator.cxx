@@ -319,6 +319,9 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
+  std::string upperConfig = 
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+
   // write language flags for target
   std::set<cmStdString> languages;
   this->Target->GetLanguages(languages);
@@ -343,11 +346,28 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     }
 
   // Add target-specific flags.
-  if(this->Target->GetProperty("COMPILE_FLAGS"))
+
+  std::string compileFlags;
+  std::string compileFlagsConfigProp = "COMPILE_FLAGS_";
+  compileFlagsConfigProp += upperConfig;
+  {
+	  const char *compileFlags_ = this->Target->GetProperty("COMPILE_FLAGS");
+	  const char *compileFlagsConfig_ = this->Target->GetProperty(compileFlagsConfigProp.c_str());
+
+	  if(compileFlags_)
+		  compileFlags += compileFlags_;
+	  if(compileFlagsConfig_) {
+		  if(!compileFlags.empty())
+			  compileFlags += ' ';
+		  compileFlags += compileFlagsConfig_;
+	  }
+  }
+
+  if( ! compileFlags.empty())
     {
     std::string flags;
     this->LocalGenerator->AppendFlags
-      (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+      (flags, compileFlags.c_str());
     *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";
     }
 }
@@ -534,11 +554,30 @@ cmMakefileTargetGenerator
   langFlags += "_FLAGS)";
   this->LocalGenerator->AppendFlags(flags, langFlags.c_str());
 
+  std::string configUpper =
+	  cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+
   bool hasCommandLinePDBFile = false;
   std::string commandLinePDBFile;
 
   // Add target-specific flags.
-  if(this->Target->GetProperty("COMPILE_FLAGS"))
+  std::string compileFlags;
+  std::string compileFlagsConfigProp = "COMPILE_FLAGS_";
+  compileFlagsConfigProp += configUpper;
+  {
+    const char *compileFlags_ = this->Target->GetProperty("COMPILE_FLAGS");
+    const char *compileFlagsConfig_ = this->Target->GetProperty(compileFlagsConfigProp.c_str());
+
+    if(compileFlags_)
+      compileFlags += compileFlags_;
+    if(compileFlagsConfig_) {
+      if(!compileFlags.empty())
+        compileFlags += ' ';
+      compileFlags += compileFlagsConfig_;
+    }
+  }
+	
+  if(!compileFlags.empty())
     {
     std::string langIncludeExpr = "CMAKE_";
     langIncludeExpr += lang;
@@ -550,7 +589,7 @@ cmMakefileTargetGenerator
       cmsys::RegularExpression r(regex);
       std::vector<std::string> args;
       cmSystemTools::ParseWindowsCommandLine(
-        this->Target->GetProperty("COMPILE_FLAGS"),
+        compileFlags.c_str(),
         args);
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
@@ -565,7 +604,7 @@ cmMakefileTargetGenerator
     else
       {
       this->LocalGenerator->AppendFlags
-        (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+        (flags, compileFlags.c_str());
       }
 
 #if defined(_WIN32)
@@ -608,6 +647,19 @@ cmMakefileTargetGenerator
                           << "\n";
     }
 
+  // Add configuration-specific flags from source file properties.
+  
+  if (source.GetProperty(compileFlagsConfigProp.c_str()))
+  {
+	  this->LocalGenerator->AppendFlags
+		  (flags, source.GetProperty(compileFlagsConfigProp.c_str()));
+	  *this->FlagFileStream << "# Custom flags: "
+		  << relativeObj << "_FLAGS_"<<  configUpper.c_str() << " = "
+		  << source.GetProperty(compileFlagsConfigProp.c_str())
+		  << "\n"
+		  << "\n";
+  }
+
   // Add language-specific defines.
   std::set<std::string> defines;
 
@@ -620,8 +672,6 @@ cmMakefileTargetGenerator
                           << compile_defs << "\n"
                           << "\n";
     }
-  std::string configUpper =
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += configUpper;
   if(const char* config_compile_defs =

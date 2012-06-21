@@ -1222,11 +1222,23 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       }
     }
   // Add the target-specific flags.
-  if(const char* targetFlags = this->Target->GetProperty("COMPILE_FLAGS"))
+  const char* targetFlags;
+  if(targetFlags = this->Target->GetProperty("COMPILE_FLAGS"))
     {
     flags += " ";
     flags += targetFlags;
     }
+
+  std::string configUpper = cmSystemTools::UpperCase(configName);
+  
+  std::string compileFlagsConfig = "COMPILE_FLAGS_";
+  compileFlagsConfig += configUpper;
+  if(targetFlags = this->Target->GetProperty(compileFlagsConfig.c_str()))
+    {
+    flags += " ";
+    flags += targetFlags;
+    }
+ 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
   clOptions.FixExceptionHandlingDefault();

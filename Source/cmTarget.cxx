@@ -191,6 +191,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "to pass additional preprocessor definitions.");
 
   cm->DefineProperty
+	  ("COMPILE_FLAGS_<CONFIG>", cmProperty::TARGET,
+	  "Additional per-configuration flags to use when compiling this target's sources.",
+	  "The COMPILE_FLAGS_<CONFIG> property sets additional compiler flags used "
+	  "to build sources within the target.  Use COMPILE_DEFINITIONS_<CONFIG> "
+	  "to pass additional preprocessor definitions for a specific configuration. ");
+
+  cm->DefineProperty
     ("COMPILE_DEFINITIONS", cmProperty::TARGET,
      "Preprocessor definitions for compiling a target's sources.",
      "The COMPILE_DEFINITIONS property may be set to a "

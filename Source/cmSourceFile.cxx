@@ -403,6 +403,12 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "preprocessor definitions.");
 
   cm->DefineProperty
+	  ("COMPILE_FLAGS_<CONFIG>", cmProperty::SOURCE_FILE,
+	  "Additional per-configuration flags to use when compiling this source file.",
+	  "Use COMPILE_DEFINITIONS_<CONFIG> "
+	  "to pass additional preprocessor definitions for a specific configuration. ");
+
+  cm->DefineProperty
     ("COMPILE_DEFINITIONS", cmProperty::SOURCE_FILE,
      "Preprocessor definitions for compiling a source file.",
      "The COMPILE_DEFINITIONS property may be set to a "

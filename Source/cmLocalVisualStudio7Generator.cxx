@@ -722,12 +722,23 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
 
   // Add the target-specific flags.
-  if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
+  const char* targetFlags;
+  if(targetFlags = target.GetProperty("COMPILE_FLAGS"))
     {
     flags += " ";
     flags += targetFlags;
     }
 
+  std::string configUpper = cmSystemTools::UpperCase(configName);
+  
+  std::string compileFlagsConfig = "COMPILE_FLAGS_";
+  compileFlagsConfig += configUpper;
+  if(targetFlags = target.GetProperty(compileFlagsConfig.c_str()))
+    {
+    flags += " ";
+    flags += targetFlags;
+    }
+	  
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
   Options::Tool t = Options::Compiler;
@@ -1427,6 +1438,7 @@ struct cmLVS7GFileConfig
 {
   std::string ObjectName;
   std::string CompileFlags;
+  std::string CompileFlagsConfig;
   std::string CompileDefs;
   std::string CompileDefsConfig;
   std::string AdditionalDeps;
@@ -1688,6 +1700,7 @@ void cmLocalVisualStudio7Generator
           fout << "\t\t\t\t\t<Tool\n"
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(!fc.CompileFlags.empty() ||
+			 !fc.CompileFlagsConfig.empty() ||
              !fc.CompileDefs.empty() ||
              !fc.CompileDefsConfig.empty())
             {
@@ -1702,6 +1715,7 @@ void cmLocalVisualStudio7Generator
             Options fileOptions(this, tool, table,
                                 this->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
+			fileOptions.Parse(fc.CompileFlagsConfig.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
             fileOptions.AddDefines(fc.CompileDefsConfig.c_str());
             fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
