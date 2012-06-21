@@ -32,15 +32,23 @@ cmCustomCommandGenerator::~cmCustomCommandGenerator()
 }
 
 //----------------------------------------------------------------------------
-unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
+unsigned int cmCustomCommandGenerator::GetNumberOfCommands(std::string& configName) const
 {
-  return static_cast<unsigned int>(this->CC.GetCommandLines().size());
+  return static_cast<unsigned int>(this->CC.GetCommandLines(configName).size());
 }
 
 //----------------------------------------------------------------------------
-std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
+unsigned int cmCustomCommandGenerator::GetNumberOfCommands(const 
+  char *configName) const
 {
-  std::string const& argv0 = this->CC.GetCommandLines()[c][0];
+  std::string config(configName);
+  return this->GetNumberOfCommands(config);
+}
+
+//----------------------------------------------------------------------------
+std::string cmCustomCommandGenerator::GetCommand(unsigned int c, std::string& configName) const
+{
+  std::string const& argv0 = this->CC.GetCommandLines(configName)[c][0];
   cmTarget* target = this->Makefile->FindTargetToUse(argv0.c_str());
   if(target && target->GetType() == cmTarget::EXECUTABLE &&
      (target->IsImported() || !this->Makefile->IsOn("CMAKE_CROSSCOMPILING")))
@@ -51,11 +59,19 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 }
 
 //----------------------------------------------------------------------------
+std::string cmCustomCommandGenerator::GetCommand(unsigned int c, const 
+  char *configName) const
+{
+	std::string config(configName);
+	return this->GetCommand(c, config);
+}
+
+//----------------------------------------------------------------------------
 void
 cmCustomCommandGenerator
-::AppendArguments(unsigned int c, std::string& cmd) const
+::AppendArguments(unsigned int c, std::string& cmd, std::string& configName) const
 {
-  cmCustomCommandLine const& commandLine = this->CC.GetCommandLines()[c];
+  cmCustomCommandLine const& commandLine = this->CC.GetCommandLines(configName)[c];
   for(unsigned int j=1;j < commandLine.size(); ++j)
     {
     std::string arg = this->GE->Parse(commandLine[j]).Evaluate(this->Makefile,
@@ -70,4 +86,13 @@ cmCustomCommandGenerator
       cmd += this->LG->EscapeForShell(arg.c_str(), this->MakeVars);
       }
     }
+}
+//----------------------------------------------------------------------------
+void
+cmCustomCommandGenerator
+::AppendArguments(unsigned int c, std::string& cmd, const 
+  char *configName) const
+{
+	std::string config(configName);
+	return this->AppendArguments(c, cmd, config);
 }

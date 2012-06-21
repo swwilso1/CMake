@@ -891,6 +891,50 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
 }
 
 //----------------------------------------------------------------------------
+void
+cmMakefile::AddCustomCommandToTarget(const char* target,
+                                     const std::vector<std::string>& depends,
+                                     const cmCustomCommandLines& commandLines,
+                                     cmTarget::CustomCommandType type,
+                                     const char* comment,
+                                     const char* workingDir,
+                                     const std::string& configName,
+                                     bool escapeOldStyle)
+{
+  // Find the target to which to add the custom command.
+  cmTargets::iterator ti = this->Targets.find(target);
+  if(ti != this->Targets.end())
+    {
+    if(ti->second.GetType() == cmTarget::OBJECT_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "Target \"" << target << "\" is an OBJECT library "
+        "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    // Add the command to the appropriate build step for the target.
+    std::vector<std::string> no_output;
+    cmCustomCommand cc(this, no_output, depends, 
+                      commandLines, comment, workingDir, configName);
+    cc.SetEscapeOldStyle(escapeOldStyle);
+    cc.SetEscapeAllowMakeVars(true);
+    switch(type)
+      {
+      case cmTarget::PRE_BUILD:
+        ti->second.GetPreBuildCommands().push_back(cc);
+        break;
+      case cmTarget::PRE_LINK:
+        ti->second.GetPreLinkCommands().push_back(cc);
+        break;
+      case cmTarget::POST_BUILD:
+        ti->second.GetPostBuildCommands().push_back(cc);
+        break;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const std::vector<std::string>& depends,
@@ -1012,6 +1056,122 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
 //----------------------------------------------------------------------------
 cmSourceFile*
+cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
+                                     const std::vector<std::string>& depends,
+                                     const char* main_dependency,
+                                     const cmCustomCommandLines& commandLines,
+                                     const char* comment,
+                                     const char* workingDir,
+                                     const std::string& configName,
+                                     bool replace,
+                                     bool escapeOldStyle)
+{
+  // Make sure there is at least one output.
+  if(outputs.empty())
+    {
+    cmSystemTools::Error("Attempt to add a custom rule with no output!");
+    return 0;
+    }
+
+  // Choose a source file on which to store the custom command.
+  cmSourceFile* file = 0;
+  if(main_dependency && main_dependency[0])
+    {
+    // The main dependency was specified.  Use it unless a different
+    // custom command already used it.
+    file = this->GetSource(main_dependency);
+    if(file && file->GetCustomCommand() && !replace)
+      {
+      // The main dependency already has a custom command.
+      if(commandLines == file->GetCustomCommand()->GetCommandLines(configName))
+        {
+        // The existing custom command is identical.  Silently ignore
+        // the duplicate.
+        return file;
+        }
+      else
+        {
+        // The existing custom command is different.  We need to
+        // generate a rule file for this new command.
+        file = 0;
+        }
+      }
+    else
+      {
+      // The main dependency does not have a custom command or we are
+      // allowed to replace it.  Use it to store the command.
+      file = this->GetOrCreateSource(main_dependency);
+      }
+    }
+
+  // Generate a rule file if the main dependency is not available.
+  if(!file)
+    {
+    // Construct a rule file associated with the first output produced.
+    std::string outName = outputs[0];
+    outName += ".rule";
+    // Check if the rule file already exists.
+    file = this->GetSource(outName.c_str());
+    if(file && file->GetCustomCommand() && !replace)
+      {
+      // The rule file already exists.
+      cmCustomCommand *cc = file->GetCustomCommand();
+      
+      if(cc->HasCommandLines(configName))
+        {
+  if(commandLines != cc->GetCommandLines(configName))
+    {
+    cmSystemTools::Error("Attempt to add a custom rule to output \"",
+                         outName.c_str(),
+                         "\" which already has a custom rule for ",
+                         "configuration \"", configName.c_str(), "\".");
+          }
+        }
+      else
+        {
+        cc->AppendCommands(commandLines, configName);
+        }
+      return file;
+      }
+
+    // Create a cmSourceFile for the rule file.
+    file = this->GetOrCreateSource(outName.c_str(), true);
+    }
+
+  // Always create the output sources and mark them generated.
+  for(std::vector<std::string>::const_iterator o = outputs.begin();
+      o != outputs.end(); ++o)
+    {
+    if(cmSourceFile* out = this->GetOrCreateSource(o->c_str(), true))
+      {
+      out->SetProperty("GENERATED", "1");
+      }
+    }
+
+  // Construct a complete list of dependencies.
+  std::vector<std::string> depends2(depends);
+  if(main_dependency && main_dependency[0])
+    {
+    depends2.push_back(main_dependency);
+    }
+
+  // Attach the custom command to the file.
+  if(file)
+    {
+    cmCustomCommand* cc =
+      new cmCustomCommand(this, outputs, depends2, commandLines,
+ 
+    comment, workingDir, configName);
+    cc->SetEscapeOldStyle(escapeOldStyle);
+    cc->SetEscapeAllowMakeVars(true);
+    file->SetCustomCommand(cc);
+    }
+
+  return file;
+}
+
+//----------------------------------------------------------------------------
+cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const char* output,
                                      const std::vector<std::string>& depends,
                                      const char* main_dependency,
@@ -1026,6 +1186,25 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
   return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
                                         commandLines, comment, workingDir,
                                         replace, escapeOldStyle);
+}
+
+//----------------------------------------------------------------------------
+cmSourceFile*
+cmMakefile::AddCustomCommandToOutput(const char* output,
+                                     const std::vector<std::string>& depends,
+                                     const char* main_dependency,
+                                     const cmCustomCommandLines& commandLines,
+                                     const char* comment,
+                                     const char* workingDir,
+                                     const std::string& configName,
+                                     bool replace,
+                                     bool escapeOldStyle)
+{
+  std::vector<std::string> outputs;
+  outputs.push_back(output);
+  return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
+                                        commandLines, comment, workingDir,
+                                        configName, replace, escapeOldStyle);
 }
 
 //----------------------------------------------------------------------------
@@ -1085,6 +1264,77 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       if (this->Targets.find(target) != this->Targets.end())
         {
         this->Targets[target].AddSourceFile(sf);
+        }
+      else
+        {
+        cmSystemTools::Error("Attempt to add a custom rule to a target "
+                             "that does not exist yet for target ", target);
+        return;
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::AddCustomCommandOldStyle(const char* target,
+                                     const std::vector<std::string>& outputs,
+                                     const std::vector<std::string>& depends,
+                                     const char* source,
+                                     const cmCustomCommandLines& commandLines,
+                                     const char* comment,
+                                     const std::string& configName)
+{
+  // Translate the old-style signature to one of the new-style
+  // signatures.
+  if(strcmp(source, target) == 0)
+    {
+    // In the old-style signature if the source and target were the
+    // same then it added a post-build rule to the target.  Preserve
+    // this behavior.
+    this->AddCustomCommandToTarget(target, depends, commandLines,
+                                   cmTarget::POST_BUILD, comment, 0,
+                                   configName);
+    return;
+    }
+
+  // Each output must get its own copy of this rule.
+  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|"
+                                       "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
+                                       "hm|hpp|hxx|in|txx|inl)$");
+  for(std::vector<std::string>::const_iterator oi = outputs.begin();
+      oi != outputs.end(); ++oi)
+    {
+    // Get the name of this output.
+    const char* output = oi->c_str();
+
+    // Choose whether to use a main dependency.
+    if(sourceFiles.find(source))
+      {
+      // The source looks like a real file.  Use it as the main dependency.
+      this->AddCustomCommandToOutput(output, depends, source,
+                                     commandLines, comment, 0, configName);
+      }
+    else
+      {
+      // The source may not be a real file.  Do not use a main dependency.
+      const char* no_main_dependency = 0;
+      std::vector<std::string> depends2 = depends;
+      depends2.push_back(source);
+      this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
+                                     commandLines, comment, 0, configName);
+      }
+
+    // If the rule was added to the source (and not a .rule file),
+    // then add the source to the target to make sure the rule is
+    // included.
+    std::string sname = output;
+    sname += ".rule";
+    if(!this->GetSource(sname.c_str()))
+      {
+      if (this->Targets.find(target) != this->Targets.end())
+        {
+        this->Targets[target].AddSource(source);
         }
       else
         {

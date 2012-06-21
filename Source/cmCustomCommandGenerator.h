@@ -32,9 +32,12 @@ public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, const char* config,
                            cmMakefile* mf);
   ~cmCustomCommandGenerator();
-  unsigned int GetNumberOfCommands() const;
-  std::string GetCommand(unsigned int c) const;
-  void AppendArguments(unsigned int c, std::string& cmd) const;
+  unsigned int GetNumberOfCommands(std::string& configName) const;
+  unsigned int GetNumberOfCommands(const char *configName) const;
+  std::string GetCommand(unsigned int c, std::string& configName) const;
+  std::string GetCommand(unsigned int c, const char *configName) const;
+  void AppendArguments(unsigned int c, std::string& cmd, std::string& configName) const;
+  void AppendArguments(unsigned int c, std::string& cmd, const char *configName) const;
 };
 
 #endif

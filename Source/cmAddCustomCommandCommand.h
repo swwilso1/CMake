@@ -70,7 +70,8 @@ public:
       "                     [DEPENDS [depends...]]\n"
       "                     [IMPLICIT_DEPENDS <lang1> depend1 ...]\n"
       "                     [WORKING_DIRECTORY dir]\n"
-      "                     [COMMENT comment] [VERBATIM] [APPEND])\n"
+      "                     [COMMENT comment] [VERBATIM] [APPEND]\n"
+      "                     [CONFIG Debug | MinSizeRel | Release | RelWithDebInfo | ...])\n"
       "This defines a command to generate specified OUTPUT file(s).  "
       "A target created in the same directory (CMakeLists.txt file) that "
       "specifies any output of the custom command as a source file is given "
@@ -102,7 +103,8 @@ public:
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
       "                     [WORKING_DIRECTORY dir]\n"
-      "                     [COMMENT comment] [VERBATIM])\n"
+      "                     [COMMENT comment] [VERBATIM]\n"
+      "                     [CONFIG Debug | MinSizeRel | Release | RelWithDebInfo | ...])\n"
       "This defines a new command that will be associated with "
       "building the specified target. When the command will "
       "happen is determined by which of the following is specified:\n"
@@ -175,6 +177,10 @@ public:
       "if the target is an executable or library a file-level dependency "
       "is created to cause the custom command to re-run whenever the target "
       "is recompiled.\n"
+
+      "The CONFIG option specifies that the custom command(s) should run "
+      "only when the given build configuration is active.  This option allows "
+      "custom commands to have configuration specific behavior.\n"
       ;
     }
 

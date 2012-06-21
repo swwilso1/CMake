@@ -67,7 +67,8 @@ public:
    * Display an error message.
    */
   static void Error(const char* m, const char* m2=0,
-                    const char* m3=0, const char* m4=0);
+                    const char* m3=0, const char* m4=0, const char *m5=0,
+                    const char *m6=0);
 
   /**
    * Display a message.

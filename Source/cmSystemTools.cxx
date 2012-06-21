@@ -216,7 +216,8 @@ std::string cmSystemTools::TrimWhitespace(const std::string& s)
 }
 
 void cmSystemTools::Error(const char* m1, const char* m2,
-                          const char* m3, const char* m4)
+                          const char* m3, const char* m4,
+                          const char* m5, const char* m6)
 {
   std::string message = "CMake Error: ";
   if(m1)
@@ -234,6 +235,14 @@ void cmSystemTools::Error(const char* m1, const char* m2,
   if(m4)
     {
     message += m4;
+    }
+  if(m5)
+    {
+    message += m5;
+    }
+  if(m6)
+    {
+    message += m6;
     }
   cmSystemTools::s_ErrorOccured = true;
   cmSystemTools::Message(message.c_str(),"Error");

@@ -1385,7 +1385,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
+    if(cc.HasCommandLines())
       {
       const std::vector<std::string>& outputs = cc.GetOutputs();
       if(!outputs.empty())
@@ -1480,7 +1480,7 @@ void  cmGlobalXCodeGenerator
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
+    if(cc.HasCommandLines() || cc.HasCommandLines(configName))
       {
       const std::vector<std::string>& outputs = cc.GetOutputs();
       if(!outputs.empty())
@@ -1506,9 +1506,6 @@ void  cmGlobalXCodeGenerator
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
-      {
-      cmCustomCommandGenerator ccg(cc, configName, this->CurrentMakefile);
       makefileStream << "\n";
       const std::vector<std::string>& outputs = cc.GetOutputs();
       if(!outputs.empty())
@@ -1535,6 +1532,9 @@ void  cmGlobalXCodeGenerator
             this->ConvertToRelativeForMake(dep.c_str());
           }
         }
+    if(!cc.GetCommandLines(configName).empty())
+      {
+      cmCustomCommandGenerator ccg(cc, configName, this->CurrentMakefile);
       makefileStream << "\n";
 
       if(const char* comment = cc.GetComment())
@@ -1546,10 +1546,10 @@ void  cmGlobalXCodeGenerator
         }
 
       // Add each command line to the set of commands.
-      for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
+      for(unsigned int c = 0; c < ccg.GetNumberOfCommands(configName); ++c)
         {
         // Build the command line in a single string.
-        std::string cmd2 = ccg.GetCommand(c);
+        std::string cmd2 = ccg.GetCommand(c, configName);
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
         cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
         std::string cmd;
@@ -1560,7 +1560,7 @@ void  cmGlobalXCodeGenerator
           cmd += " && ";
           }
         cmd += cmd2;
-        ccg.AppendArguments(c, cmd);
+        ccg.AppendArguments(c, cmd, configName);
         makefileStream << "\t" << cmd.c_str() << "\n";
         }
       }
@@ -1683,27 +1683,29 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
     }
 
-  const char* linkFlagsProp = "LINK_FLAGS";
-  if(target.GetType() == cmTarget::OBJECT_LIBRARY ||
-     target.GetType() == cmTarget::STATIC_LIBRARY)
+  const char *targetLinkFlags = 0;
+  std::string linkFlagsProp = "LINK_FLAGS_";
+  if(target.GetType() == cmTarget::STATIC_LIBRARY)
+  {
+  linkFlagsProp = "STATIC_LIBRARY_FLAGS_";
+  }
+
+  if(configName)
     {
-    linkFlagsProp = "STATIC_LIBRARY_FLAGS";
-    }
-  const char* targetLinkFlags = target.GetProperty(linkFlagsProp);
-  if(targetLinkFlags)
-    {
-    extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
-    }
-  if(configName && *configName)
-    {
-    std::string linkFlagsVar = linkFlagsProp;
-    linkFlagsVar += "_";
-    linkFlagsVar += cmSystemTools::UpperCase(configName);
-    if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
+    linkFlagsProp += cmSystemTools::UpperCase(configName);
+    if((targetLinkFlags = target.GetProperty(linkFlagsProp.c_str())) != 0)
       {
       extraLinkOptions += " ";
-      extraLinkOptions += linkFlags;
+      extraLinkOptions += targetLinkFlags; 
+      }
+    }
+  else
+    {
+    targetLinkFlags = target.GetProperty(linkFlagsProp.c_str());
+    if(targetLinkFlags)
+      {
+      extraLinkOptions += " ";
+      extraLinkOptions += targetLinkFlags;
       }
     }
 
@@ -1733,6 +1735,17 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
         archObjects->AddObject(this->CreateString((*i).c_str()));
         }
       buildSettings->AddAttribute("ARCHS", archObjects);
+      }
+    }
+  if(configName && *configName)
+    {
+    std::string linkFlagsVar = linkFlagsProp;
+    linkFlagsVar += "_";
+    linkFlagsVar += cmSystemTools::UpperCase(configName);
+    if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
+      {
+      extraLinkOptions += " ";
+      extraLinkOptions += linkFlags;
       }
     }
 
@@ -2052,6 +2065,19 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString("NO"));
   buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN",
                               this->CreateString("NO"));
+
+  if(configName)
+    {
+    std::string compileflags = "COMPILE_FLAGS_";
+    compileflags += cmSystemTools::UpperCase(configName);
+    if(target.GetProperty(compileflags.c_str()))
+      {
+      this->CurrentLocalGenerator->AppendFlags(flags,
+        target.GetProperty(compileflags.c_str()));
+      }
+    }
+
+
   if(lang && strcmp(lang, "CXX") == 0)
     {
     flags += " ";

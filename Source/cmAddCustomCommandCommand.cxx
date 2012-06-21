@@ -37,6 +37,7 @@ bool cmAddCustomCommandCommand
   bool append = false;
   std::string implicit_depends_lang;
   cmCustomCommand::ImplicitDependsList implicit_depends;
+  std::string intendedConfig;
 
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
@@ -58,6 +59,7 @@ bool cmAddCustomCommandCommand
     doing_outputs,
     doing_comment,
     doing_working_directory,
+    doing_config,
     doing_nothing
   };
 
@@ -137,6 +139,10 @@ bool cmAddCustomCommandCommand
     else if (copy == "COMMENT")
       {
       doing = doing_comment;
+      }
+    else if (copy == "CONFIG")
+      {
+      doing = doing_config;
       }
     else
       {
@@ -228,6 +234,9 @@ bool cmAddCustomCommandCommand
            comment_buffer = copy;
            comment = comment_buffer.c_str();
            break;
+         case doing_config:
+           intendedConfig = copy;
+           break;
          default:
            this->SetError("Wrong syntax. Unknown type of argument.");
            return false;
@@ -277,7 +286,14 @@ bool cmAddCustomCommandCommand
       {
       if(cmCustomCommand* cc = sf->GetCustomCommand())
         {
-        cc->AppendCommands(commandLines);
+        if(! intendedConfig.empty())
+          {
+          cc->AppendCommands(commandLines, intendedConfig);
+          }
+        else
+          {
+          cc->AppendCommands(commandLines);
+          }
         cc->AppendDepends(depends);
         cc->AppendImplicitDepends(implicit_depends);
         return true;
@@ -305,19 +321,42 @@ bool cmAddCustomCommandCommand
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
-                                             commandLines, cctype,
-                                             comment, working.c_str(),
-                                             escapeOldStyle);
+    if(! intendedConfig.empty())
+      {
+      this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
+                                               commandLines, cctype,
+                                               comment, working.c_str(),
+                                               intendedConfig,
+                                               escapeOldStyle);
+      }
+    else
+      {
+      this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
+                                               commandLines, cctype,
+                                               comment, working.c_str(),
+                                               escapeOldStyle);
+      }
     }
   else if(target.empty())
     {
     // Target is empty, use the output.
-    this->Makefile->AddCustomCommandToOutput(output, depends,
-                                             main_dependency.c_str(),
-                                             commandLines, comment,
-                                             working.c_str(), false,
-                                             escapeOldStyle);
+    if(! intendedConfig.empty())
+      {
+      this->Makefile->AddCustomCommandToOutput(output, depends,
+                                               main_dependency.c_str(),
+                                               commandLines, comment,
+                                               working.c_str(),
+                                               intendedConfig, false,
+                                               escapeOldStyle);
+      }
+    else
+      {
+      this->Makefile->AddCustomCommandToOutput(output, depends,
+                                               main_dependency.c_str(),
+                                               commandLines, comment,
+                                               working.c_str(), false,
+                                               escapeOldStyle);
+      }
 
     // Add implicit dependency scanning requests if any were given.
     if(!implicit_depends.empty())
@@ -345,9 +384,18 @@ bool cmAddCustomCommandCommand
   else
     {
     // Use the old-style mode for backward compatibility.
+    if(! intendedConfig.empty())
+      {
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
                                              source.c_str(), commandLines,
-                                             comment);
+                                             comment, intendedConfig);
+      }
+    else
+      {
+      this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
+                                               source.c_str(), commandLines,
+                                               comment);
+      }
     }
 
   return true;

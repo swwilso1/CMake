@@ -26,6 +26,7 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Outputs(r.Outputs),
   Depends(r.Depends),
   CommandLines(r.CommandLines),
+  ConfigurationCommandLines(r.ConfigurationCommandLines),
   HaveComment(r.HaveComment),
   Comment(r.Comment),
   WorkingDirectory(r.WorkingDirectory),
@@ -61,6 +62,31 @@ cmCustomCommand::cmCustomCommand(cmMakefile* mf,
 }
 
 //----------------------------------------------------------------------------
+cmCustomCommand::cmCustomCommand(cmMakefile* mf,
+								 const std::vector<std::string>& outputs,
+                                 const std::vector<std::string>& depends,
+                                 const cmCustomCommandLines& commandLines,
+                                 const char* comment,
+                                 const char* workingDirectory,
+                                 const std::string& configName):
+  Outputs(outputs),
+  Depends(depends),
+  HaveComment(comment?true:false),
+  Comment(comment?comment:""),
+  WorkingDirectory(workingDirectory?workingDirectory:""),
+  EscapeAllowMakeVars(false),
+  EscapeOldStyle(true),
+  Backtrace(new cmListFileBacktrace)
+{
+  ConfigurationCommandLines[configName] = commandLines;
+  this->EscapeOldStyle = true;
+  this->EscapeAllowMakeVars = false;
+  if(mf)
+    {
+    mf->GetBacktrace(*this->Backtrace);
+    }
+}
+//----------------------------------------------------------------------------
 cmCustomCommand::~cmCustomCommand()
 {
   delete this->Backtrace;
@@ -95,6 +121,27 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 }
 
 //----------------------------------------------------------------------------
+const cmCustomCommandLines& cmCustomCommand::GetCommandLines(const 
+  std::string& configName) const
+{
+  std::map<std::string, cmCustomCommandLines>::const_iterator ci =
+   this->ConfigurationCommandLines.find(configName);
+  if(ci != this->ConfigurationCommandLines.end())
+    {
+      return ci->second;
+    }
+  return this->CommandLines;
+}
+
+//----------------------------------------------------------------------------
+const cmCustomCommandLines& cmCustomCommand::GetCommandLines(const 
+  char *configName) const
+{
+  std::string config(configName);
+  return this->GetCommandLines(config);
+}
+
+//----------------------------------------------------------------------------
 const char* cmCustomCommand::GetComment() const
 {
   const char* no_comment = 0;
@@ -109,6 +156,35 @@ void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
     {
     this->CommandLines.push_back(*i);
     }
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines,
+  const std::string& configName)
+{
+  cmCustomCommandLines configLines = 
+    this->ConfigurationCommandLines[configName];
+  for(cmCustomCommandLines::const_iterator ci = commandLines.begin();
+    ci != commandLines.end(); ci++)
+    {
+    configLines.push_back(*ci);
+    }
+  this->ConfigurationCommandLines[configName] = configLines;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines,
+  const char *configName)
+{
+  std::string config(configName);
+  cmCustomCommandLines configLines = 
+    this->ConfigurationCommandLines[config];
+  for(cmCustomCommandLines::const_iterator ci = commandLines.begin();
+    ci != commandLines.end(); ci++)
+    {
+    configLines.push_back(*ci);
+    }
+  this->ConfigurationCommandLines[config] = configLines;
 }
 
 //----------------------------------------------------------------------------
@@ -149,6 +225,42 @@ void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
 cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
 {
   return *this->Backtrace;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::HasCommandLines() const
+{
+  if(! this->CommandLines.empty())
+    {
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::HasCommandLines(const std::string& configName) const
+{
+  if(! this->ConfigurationCommandLines.empty())
+    {
+    for(std::map<std::string,cmCustomCommandLines>::const_iterator ci =
+      this->ConfigurationCommandLines.begin(); ci != 
+      this->ConfigurationCommandLines.end(); ci++)
+      {
+      if(configName == ci->first && (! ci->second.empty()))
+        {
+        return true;
+        }
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::HasCommandLines(const char *configName) const
+{
+  std::string config(configName);
+  return this->HasCommandLines(config);
 }
 
 //----------------------------------------------------------------------------
