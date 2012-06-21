@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
     hcm.GetPropertiesDocumentation(propDocs);
-    doc.SetName("cmake");
+    doc.SetName("WRI cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);

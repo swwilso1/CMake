@@ -308,7 +308,7 @@ int main (int argc, char *argv[])
       ch->GetCommandDocumentation(commands);
 
       doc.SetShowGenerators(false);
-      doc.SetName("ctest");
+      doc.SetName("WRI ctest");
       doc.SetSection("Name",cmDocumentationName);
       doc.SetSection("Usage",cmDocumentationUsage);
       doc.SetSection("Description",cmDocumentationDescription);

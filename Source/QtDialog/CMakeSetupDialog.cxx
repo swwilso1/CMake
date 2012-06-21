@@ -58,7 +58,7 @@ void QCMakeThread::run()
 CMakeSetupDialog::CMakeSetupDialog()
   : ExitAfterGenerate(true), CacheModified(false), ConfigureNeeded(true), CurrentState(Interrupting)
 {
-  QString title = QString(tr("CMake %1"));
+  QString title = QString(tr("WRI CMake %1"));
   title = title.arg(cmVersion::GetCMakeVersion());
   this->setWindowTitle(title);
 
@@ -610,7 +610,7 @@ void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
 
 void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
 {
-  QString title = QString(tr("CMake %1 - %2"));
+  QString title = QString(tr("WRI CMake %1 - %2"));
   title = title.arg(cmVersion::GetCMakeVersion());
   title = title.arg(dir);
   this->setWindowTitle(title);
@@ -785,7 +785,7 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = tr("CMake %1\n"
+  QString msg = tr("WRI CMake %1\n"
                 "Using Qt %2\n"
                 "www.cmake.org");
 

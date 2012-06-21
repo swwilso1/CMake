@@ -112,7 +112,7 @@ int main(int argc, char** argv)
     hcm.GetCommandDocumentation(commands, true, false);
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
-    doc.SetName("ccmake");
+    doc.SetName("WRI ccmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);

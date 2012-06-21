@@ -1108,10 +1108,10 @@ void CMakeCommandUsage(const char* program)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   errorStream
-    << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
+    << "WRI cmake version " << cmVersion::GetCMakeVersion() << "\n";
 #else
   errorStream
-    << "cmake bootstrap\n";
+    << "WRI cmake bootstrap\n";
 #endif
   // If you add new commands, change here,
   // and in cmakemain.cxx in the options table

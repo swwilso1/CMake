@@ -531,8 +531,7 @@ int main (int argc, char *argv[])
   if ( help )
     {
     // Construct and print requested documentation.
-
-    doc.SetName("cpack");
+    doc.SetName("WRI cpack");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);

@@ -389,7 +389,7 @@ int do_cmake(int ac, char** av)
     hcm.GetPropertiesDocumentation(propDocs);
     hcm.GetGeneratorDocumentation(generators);
 
-    doc.SetName("cmake");
+    doc.SetName("WRI cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
