@@ -65,7 +65,7 @@ else()
 
     # finally list compilers to try
     if(NOT CMAKE_CXX_COMPILER_INIT)
-      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC clang++)
+      set(CMAKE_CXX_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}g++ ${_CMAKE_TOOLCHAIN_PREFIX}c++ CC aCC cl bcc xlC clang++)
     endif()
 
     _cmake_find_compiler(CXX)
