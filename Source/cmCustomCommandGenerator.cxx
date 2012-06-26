@@ -46,6 +46,12 @@ unsigned int cmCustomCommandGenerator::GetNumberOfCommands(const
 }
 
 //----------------------------------------------------------------------------
+unsigned int cmCustomCommandGenerator::GetNumberOfCommands(void) const
+{
+  return this->GetNumberOfCommands(Config);
+}
+
+//----------------------------------------------------------------------------
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c, std::string& configName) const
 {
   std::string const& argv0 = this->CC.GetCommandLines(configName)[c][0];
@@ -64,6 +70,12 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c, const
 {
 	std::string config(configName);
 	return this->GetCommand(c, config);
+}
+
+//----------------------------------------------------------------------------
+std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
+{
+  return this->GetCommand(c, Config);
 }
 
 //----------------------------------------------------------------------------
@@ -96,3 +108,12 @@ cmCustomCommandGenerator
 	std::string config(configName);
 	return this->AppendArguments(c, cmd, config);
 }
+
+//----------------------------------------------------------------------------
+void 
+cmCustomCommandGenerator
+::AppendArguments(unsigned int c, std::string& cmd) const
+{
+  return this->AppendArguments(c, cmd, Config);
+}
+

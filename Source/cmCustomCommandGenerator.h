@@ -34,10 +34,13 @@ public:
   ~cmCustomCommandGenerator();
   unsigned int GetNumberOfCommands(std::string& configName) const;
   unsigned int GetNumberOfCommands(const char *configName) const;
+  unsigned int GetNumberOfCommands(void) const;
   std::string GetCommand(unsigned int c, std::string& configName) const;
   std::string GetCommand(unsigned int c, const char *configName) const;
+  std::string GetCommand(unsigned int c) const;
   void AppendArguments(unsigned int c, std::string& cmd, std::string& configName) const;
   void AppendArguments(unsigned int c, std::string& cmd, const char *configName) const;
+  void AppendArguments(unsigned int c, std::string& cmd) const;
 };
 
 #endif
