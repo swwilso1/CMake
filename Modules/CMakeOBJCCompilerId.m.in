@@ -4,10 +4,18 @@
 #endif
 
 #if defined(__clang__)
-#  define COMPILER_ID "Clang"
+# define COMPILER_ID "Clang"
+# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
+# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
+# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
 
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
+# define COMPILER_VERSION_MAJOR DEC(__GNUC__)
+# define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
+# if defined(__GNUC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
 
 #else /* unknown compiler */
 # define COMPILER_ID ""
@@ -29,6 +37,9 @@ int main(int argc, char* argv[])
   int require = 0;
   require += info_compiler[argc];
   require += info_platform[argc];
+#ifdef COMPILER_VERSION_MAJOR
+  require += info_version[argc];
+#endif
   (void)argv;
   return require;
 }
