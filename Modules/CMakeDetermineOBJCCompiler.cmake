@@ -79,20 +79,13 @@ INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
 CMAKE_DETERMINE_COMPILER_ID(OBJC OBJCFLAGS CMakeOBJCCompilerId.m)
 
 
+INCLUDE(CMakeFindBinUtils)
+
 # Look for libtool:
 if(NOT CMAKE_LIBTOOL)
-	find_program(CMAKE_LIBTOOL NAMES libtool PATHS "${_CMAKE_TOOLCHAIN_LOCATION}" DOC "Libtool")
+	find_program(CMAKE_LIBTOOL NAMES libtool HINTS "${_CMAKE_TOOLCHAIN_LOCATION}" DOC "Libtool")
+	message(STATUS "LIBTOOL: ${CMAKE_LIBTOOL}")
 endif(NOT CMAKE_LIBTOOL)
-
-# Look for ar:
-if(NOT CMAKE_AR)
-	find_program(CMAKE_AR NAMES ar PATHS "${_CMAKE_TOOLCHAIN_LOCATION}" DOC "ar")
-endif(NOT CMAKE_AR)
-
-# Look for ranlib:
-if(NOT CMAKE_RANLIB)
-	find_program(CMAKE_RANLIB NAMES ranlib PATHS "${_CMAKE_TOOLCHAIN_LOCATION}" DOC "Ranlib tool")
-endif(NOT CMAKE_RANLIB)
 
 configure_file(${CMAKE_ROOT}/Modules/CMakeOBJCCompiler.cmake.in
 	${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOBJCCompiler.cmake
