@@ -3172,6 +3172,46 @@ void cmGlobalXCodeGenerator
                                 this->CreateString(deploymentTarget));
     }
 
+  if(this->XcodeVersion >= 32)
+    {
+    std::string theCompiler;
+
+    if(this->GetLanguageEnabled("C") && 
+      this->CurrentMakefile->GetDefinition("CMAKE_C_COMPILER") != NULL)
+    {
+    theCompiler = this->CurrentMakefile->GetDefinition("CMAKE_C_COMPILER");
+    }
+    else if(this->GetLanguageEnabled("CXX") &&
+      this->CurrentMakefile->GetDefinition("CMAKE_CXX_COMPILER") != NULL)
+    {
+    theCompiler = this->CurrentMakefile->GetDefinition("CMAKE_CXX_COMPILER");
+    }
+    else if(this->GetLanguageEnabled("OBJC") && 
+      this->CurrentMakefile->GetDefinition("CMAKE_OBJC_COMPILER") != NULL)
+    {
+    theCompiler = this->CurrentMakefile->GetDefinition("CMAKE_OBJC_COMPILER");
+    }
+    else
+    {
+    theCompiler = "";
+    }
+
+    if(theCompiler.find("gcc") != std::string::npos ||
+      theCompiler.find("g++") != std::string::npos)
+      {
+      buildSettings->AddAttribute("GCC_VERSION",
+        this->CreateString("com.apple.compilers.llvmgcc42"));
+      }
+    else if(theCompiler.find("clang") != std::string::npos)
+      {
+      buildSettings->AddAttribute("GCC_VERSION",
+        this->CreateString("com.apple.compilers.llvm.clang.1_0"));
+      }
+
+    buildSettings->AddAttribute("DEBUG_INFORMATION_FORMAT",
+        this->CreateString("dwarf-with-dsym"));
+    }
+
   // Put this last so it can override existing settings
   // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
   {
