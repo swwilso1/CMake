@@ -1530,18 +1530,6 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   imLib += "/";
   imLib += targetNameImport;
 
-  std::string pdb;
-  Options& clOptions = *(this->ClOptions[config]);
-  if(clOptions.HasPDBName())
-    {
-    pdb = clOptions.GetPDBName();
-    }
-  else
-    {
-    pdb = dir;
-    pdb += targetNamePDB;
-    }
-
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
