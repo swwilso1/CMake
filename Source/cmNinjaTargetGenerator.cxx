@@ -169,6 +169,13 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Append old-style preprocessor definition flags.
   this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
 
+  std::string upperConfig = 
+    cmSystemTools::UpperCase(this->LocalGenerator->GetConfigName());
+  std::string compileFlagsByConfig = std::string("COMPILE_FLAGS") + 
+    "_" + upperConfig;
+  std::string compileFlags;
+  const char *actualCompileFlags;
+  const char *compileFlagsByConfiguration;
   // Add target-specific flags.
   if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
@@ -193,17 +200,58 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
             (flags, i->c_str());
           }
         }
+      args.clear();
+      cmSystemTools::ParseWindowsCommandLine(
+        this->Target->GetProperty(compileFlagsByConfig.c_str()),
+        args);
+      for(std::vector<std::string>::iterator i = args.begin();
+          i != args.end(); ++i)
+        {
+        if(r.find(i->c_str()))
+          {
+          this->LocalGenerator->AppendFlags
+            (flags, i->c_str());
+          }
+        }
       }
     else
       {
-      this->LocalGenerator->AppendFlags
-        (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+
+      actualCompileFlags = this->Target->GetProperty("COMPILE_FLAGS");
+      compileFlagsByConfiguration = this->Target->GetProperty(
+        compileFlagsByConfig.c_str());
+
+      if(actualCompileFlags)
+        compileFlags += actualCompileFlags;
+      if(compileFlagsByConfiguration)
+      {
+      if(! compileFlags.empty())
+        compileFlags += " ";
+      compileFlags += compileFlagsByConfiguration;
       }
+      this->LocalGenerator->AppendFlags
+        (flags, compileFlags.c_str());
+      }
+    }
+
+    compileFlags.clear();
+
+    actualCompileFlags = source->GetProperty("COMPILE_FLAGS");
+    compileFlagsByConfiguration = source->GetProperty(
+      compileFlagsByConfig.c_str());
+
+    if(actualCompileFlags)
+      compileFlags += actualCompileFlags;
+    if(compileFlagsByConfiguration)
+    {
+    if(! compileFlags.empty())
+      compileFlags += " ";
+    compileFlags += compileFlagsByConfiguration;
     }
 
     // Add source file specific flags.
     this->LocalGenerator->AppendFlags(flags,
-      source->GetProperty("COMPILE_FLAGS"));
+      compileFlags.c_str());
 
   // TODO: Handle Apple frameworks.
 
