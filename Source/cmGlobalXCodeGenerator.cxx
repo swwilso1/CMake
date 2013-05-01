@@ -775,6 +775,10 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode += ".text";
     }
+  else if(ext == "mc")
+    {
+    sourcecode += ".c";
+    }
   else if(lang == "CXX")
     {
     sourcecode += ".cpp.cpp";
@@ -841,6 +845,10 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
 
   fileRef->AddAttribute("lastKnownFileType",
                         this->CreateString(sourcecode.c_str()));
+
+  if(ext == "mc")
+    fileRef->AddAttribute("explicitFileType",
+                          this->CreateString(sourcecode.c_str()));
 
   // Store the file path relative to the top of the source tree.
   std::string path = this->RelativeToSource(fullpath.c_str());
