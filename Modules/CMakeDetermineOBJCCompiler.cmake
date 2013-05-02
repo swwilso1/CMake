@@ -88,14 +88,8 @@ if(NOT CMAKE_LIBTOOL)
 endif(NOT CMAKE_LIBTOOL)
 
 configure_file(${CMAKE_ROOT}/Modules/CMakeOBJCCompiler.cmake.in
-	${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOBJCCompiler.cmake
+	${CMAKE_PLATFORM_INFO_DIR}/CMakeOBJCCompiler.cmake
 	@ONLY IMMEDIATE
 )
 
-
-
-
-
 set(CMAKE_OBJC_COMPILER_ENV_VAR "OBJC")
-
-
