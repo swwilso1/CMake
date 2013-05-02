@@ -84,7 +84,6 @@ INCLUDE(CMakeFindBinUtils)
 # Look for libtool:
 if(NOT CMAKE_LIBTOOL)
 	find_program(CMAKE_LIBTOOL NAMES libtool HINTS "${_CMAKE_TOOLCHAIN_LOCATION}" DOC "Libtool")
-	message(STATUS "LIBTOOL: ${CMAKE_LIBTOOL}")
 endif(NOT CMAKE_LIBTOOL)
 
 configure_file(${CMAKE_ROOT}/Modules/CMakeOBJCCompiler.cmake.in
