@@ -3204,17 +3204,9 @@ void cmGlobalXCodeGenerator
     theCompiler = "";
     }
 
-    if(theCompiler.find("gcc") != std::string::npos ||
-      theCompiler.find("g++") != std::string::npos)
-      {
-      buildSettings->AddAttribute("GCC_VERSION",
-        this->CreateString("com.apple.compilers.llvmgcc42"));
-      }
-    else if(theCompiler.find("clang") != std::string::npos)
-      {
-      buildSettings->AddAttribute("GCC_VERSION",
-        this->CreateString("com.apple.compilers.llvm.clang.1_0"));
-      }
+    // For Xcode 5.x and newer, only use clang.
+    buildSettings->AddAttribute("GCC_VERSION",
+      this->CreateString("com.apple.compilers.llvm.clang.1_0"));
 
     buildSettings->AddAttribute("DEBUG_INFORMATION_FORMAT",
         this->CreateString("dwarf-with-dsym"));
