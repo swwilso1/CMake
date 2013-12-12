@@ -35,6 +35,10 @@
 /* case insensitive strstr() */
 char *Curl_strcasestr(const char *haystack, const char *needle);
 
+#ifndef HAVE_STRLCAT
+#define strlcat(x,y,z) Curl_strlcat(x,y,z)
+#endif
+
 #endif
 
 
