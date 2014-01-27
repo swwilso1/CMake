@@ -37,6 +37,15 @@ public:
                   const char* comment,
                   const char* workingDirectory);
 
+  /** Main constructor that contains configuration name. */
+  cmCustomCommand(cmMakefile const* mf,
+                  const std::vector<std::string>& outputs,
+                  const std::vector<std::string>& depends,
+                  const cmCustomCommandLines& commandLines,
+                  const char* comment,
+                  const char* workingDirectory,
+                  const std::string& configName);
+
   ~cmCustomCommand();
 
   /** Get the output file produced by the command.  */
@@ -51,11 +60,19 @@ public:
   /** Get the list of command lines.  */
   const cmCustomCommandLines& GetCommandLines() const;
 
+  /** Get the list of command lines for the configuration. */
+  const cmCustomCommandLines&
+    GetCommandLines(const std::string& configName) const;
+
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
   /** Append to the list of command lines.  */
   void AppendCommands(const cmCustomCommandLines& commandLines);
+
+  /** Append to the list of command lines for the configuration */
+  void AppendCommands(const cmCustomCommandLines& commandLines, const
+    std::string& configName);
 
   /** Append to the list of dependencies.  */
   void AppendDepends(const std::vector<std::string>& depends);
@@ -73,6 +90,14 @@ public:
   cmListFileBacktrace const& GetBacktrace() const;
 
   typedef std::pair<cmStdString, cmStdString> ImplicitDependsPair;
+
+  /** Check if the custom command has command lines. */
+  bool HasCommandLines(void) const;
+
+  /** Check if the customm command has command lines for the
+    configuration. */
+  bool HasCommandLines(const std::string& configName) const;
+
   class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
   void SetImplicitDepends(ImplicitDependsList const&);
   void AppendImplicitDepends(ImplicitDependsList const&);
@@ -82,6 +107,7 @@ private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
+  std::map<std::string, cmCustomCommandLines> ConfigurationCommandLines;
   bool HaveComment;
   std::string Comment;
   std::string WorkingDirectory;
