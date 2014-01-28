@@ -37,8 +37,12 @@ public:
   ~cmCustomCommandGenerator();
   cmCustomCommand const& GetCC() const { return this->CC; }
   unsigned int GetNumberOfCommands() const;
+  unsigned int GetNumberOfCommands(const std::string& configName) const;
   std::string GetCommand(unsigned int c) const;
+  std::string GetCommand(unsigned int c, const std::string& configName) const;
   void AppendArguments(unsigned int c, std::string& cmd) const;
+  void AppendArguments(unsigned int c, std::string& cmd,
+    const std::string& configName) const;
   const char* GetComment() const;
   std::string GetWorkingDirectory() const;
   std::vector<std::string> const& GetOutputs() const;
