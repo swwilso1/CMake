@@ -1557,7 +1557,8 @@ void  cmGlobalXCodeGenerator
       i != commands.end(); ++i)
     {
     cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
-    if(ccg.GetNumberOfCommands() > 0)
+    cmCustomCommand const& cc = *i;
+    if(cc.HasCommandLines() || cc.HasCommandLines(configName))
       {
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       if(!outputs.empty())
@@ -1593,7 +1594,8 @@ void  cmGlobalXCodeGenerator
       i != commands.end(); ++i)
     {
     cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
-    if(ccg.GetNumberOfCommands() > 0)
+    cmCustomCommand const& cc = *i;
+    if(cc.HasCommandLines() || cc.HasCommandLines(configName))
       {
       makefileStream << "\n";
       const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -1613,14 +1615,13 @@ void  cmGlobalXCodeGenerator
           ccg.GetDepends().begin();
           d != ccg.GetDepends().end(); ++d)
         {
-        std::string dep;
-        if(this->CurrentLocalGenerator
-           ->GetRealDependency(d->c_str(), configName, dep))
-          {
-          makefileStream << "\\\n" <<
-            this->ConvertToRelativeForMake(dep.c_str());
-          }
+        makefileStream << "\\\n" <<
+          this->ConvertToRelativeForMake(dep.c_str());
         }
+      }
+    if(cc.HasCommandLines(configName))
+      {
+      cmCustomCommandGenerator ccg(cc, configName, this->CurrentMakefile);
       makefileStream << "\n";
 
       if(const char* comment = ccg.GetComment())
@@ -1632,10 +1633,10 @@ void  cmGlobalXCodeGenerator
         }
 
       // Add each command line to the set of commands.
-      for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
+      for(unsigned int c = 0; c < ccg.GetNumberOfCommands(configName); ++c)
         {
         // Build the command line in a single string.
-        std::string cmd2 = ccg.GetCommand(c);
+        std::string cmd2 = ccg.GetCommand(c, configName);
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
         cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
         std::string cmd;
@@ -1647,7 +1648,7 @@ void  cmGlobalXCodeGenerator
           cmd += " && ";
           }
         cmd += cmd2;
-        ccg.AppendArguments(c, cmd);
+        ccg.AppendArguments(c, cmd, configName);
         makefileStream << "\t" << cmd.c_str() << "\n";
         }
       }
