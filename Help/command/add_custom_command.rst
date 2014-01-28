@@ -16,7 +16,8 @@ signature is for adding a custom command to produce an output.
                      [IMPLICIT_DEPENDS <lang1> depend1
                                       [<lang2> depend2] ...]
                      [WORKING_DIRECTORY dir]
-                     [COMMENT comment] [VERBATIM] [APPEND])
+                     [COMMENT comment] [VERBATIM] [APPEND]
+                     [CONFIG Debug | MinSizeRel | Release | RelWithDebInfo | ...])
 
 This defines a command to generate specified OUTPUT file(s).  A target
 created in the same directory (CMakeLists.txt file) that specifies any
@@ -54,7 +55,8 @@ target is already built, the command will not execute.
                      COMMAND command1 [ARGS] [args1...]
                      [COMMAND command2 [ARGS] [args2...] ...]
                      [WORKING_DIRECTORY dir]
-                     [COMMENT comment] [VERBATIM])
+                     [COMMENT comment] [VERBATIM]
+                     [CONFIG Debug | MinSizeRel | Release | RelWithDebInfo | ...])
 
 This defines a new command that will be associated with building the
 specified target.  When the command will happen is determined by which
@@ -103,6 +105,10 @@ list.  Dependencies discovered from the scanning are added to those of
 the custom command at build time.  Note that the IMPLICIT_DEPENDS
 option is currently supported only for Makefile generators and will be
 ignored by other generators.
+
+The CONFIG option specifies that the custom command(s) should run
+only when the given build configuration is active.  This option allows
+custom commands to have configuration specific behavior.
 
 If COMMAND specifies an executable target (created by ADD_EXECUTABLE)
 it will automatically be replaced by the location of the executable
