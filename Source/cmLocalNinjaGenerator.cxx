@@ -378,7 +378,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
   cmCustomCommandGenerator const& ccg,
   std::vector<std::string> &cmdLines)
 {
-  if (ccg.GetNumberOfCommands() > 0) {
+  if (ccg.GetNumberOfCommands(this->GetConfigName()) > 0) {
     std::string wd = ccg.GetWorkingDirectory();
     if (wd.empty())
       wd = this->GetMakefile()->GetStartOutputDirectory();
@@ -395,12 +395,14 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 
   std::string launcher = this->MakeCustomLauncher(ccg);
 
-  for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
+  for (unsigned i = 0; i != ccg.GetNumberOfCommands(
+    this->GetConfigName()); ++i) {
     cmdLines.push_back(launcher +
-      this->ConvertToOutputFormat(ccg.GetCommand(i), SHELL));
+      this->ConvertToOutputFormat(ccg.GetCommand(i,this->GetConfigName()),
+        SHELL));
 
     std::string& cmd = cmdLines.back();
-    ccg.AppendArguments(i, cmd);
+    ccg.AppendArguments(i, cmd, this->GetConfigName());
   }
 }
 
