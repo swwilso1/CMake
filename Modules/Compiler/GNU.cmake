@@ -55,4 +55,67 @@ macro(__compiler_gnu lang)
   if(NOT APPLE)
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
   endif()
+
+  # LTO/IPO
+  if(NOT CMAKE_GCC_AR OR NOT CMAKE_GCC_RANLIB)
+    if(IS_ABSOLUTE "${CMAKE_${lang}_COMPILER}")
+      string(REGEX MATCH "^([0-9]+.[0-9]+)" _version
+        "${CMAKE_${lang}_COMPILER_VERSION}")
+      get_filename_component(_dir "${CMAKE_${lang}_COMPILER}" DIRECTORY)
+
+      find_program(CMAKE_GCC_AR NAMES
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar"
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar-${_version}"
+      )
+
+      find_program(CMAKE_GCC_RANLIB NAMES
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib"
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib-${_version}"
+      )
+    endif()
+  endif()
+
+  if(CMAKE_GCC_AR AND CMAKE_GCC_RANLIB)
+    if(NOT DEFINED CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER)
+      execute_process(
+        COMMAND ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_VERBOSE_FLAG}
+        RESULT_VARIABLE __result
+        ERROR_VARIABLE __output
+        OUTPUT_QUIET
+      )
+
+      set(__lto_found FALSE)
+      if("${__result}" STREQUAL "0" AND
+        "${__output}" MATCHES "COLLECT_LTO_WRAPPER")
+
+        set(__lto_found TRUE)
+      endif()
+
+      set(CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER
+        ${__lto_found} CACHE INTERNAL
+        "If the output of gcc -v contains COLLECT_LTO_WRAPPER")
+    endif()
+
+    if(CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER)
+      set(__lto_flags -flto)
+
+      if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7)
+        list(APPEND __lto_flags -fno-fat-lto-objects)
+      endif()
+
+      set(CMAKE_${lang}_COMPILE_OPTIONS_IPO ${__lto_flags})
+
+      set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
+        "${CMAKE_GCC_AR} cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+      )
+
+      set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
+        "${CMAKE_GCC_AR} r <TARGET> <LINK_FLAGS> <OBJECTS>"
+      )
+
+      set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
+        "${CMAKE_GCC_RANLIB} <TARGET>"
+      )
+    endif()
+  endif()
 endmacro()
