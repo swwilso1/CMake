@@ -401,8 +401,9 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
   endif()
 
-  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND
-    CMAKE_SYSTEM_NAME MATCHES "Linux")
+  if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND
+    (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.2) AND
+    (CMAKE_SYSTEM_NAME MATCHES "Linux"))
 
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(
