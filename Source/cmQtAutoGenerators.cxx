@@ -1290,7 +1290,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     {
     const bool skipUic = std::find(uicSkipped.begin(), uicSkipped.end(), *it)
         != uicSkipped.end();
-    std::map<std::string, std::string>& uiFiles = skipUic ? skippedUis : includedUis;
+    std::map<std::string, std::string>& uiFiles
+                                          = skipUic ? skippedUis : includedUis;
     const std::string &absFilename = *it;
     if (this->Verbose)
       {
@@ -1350,7 +1351,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     {
     this->GenerateMoc(it->first, it->second);
     }
-  for(std::map<std::string, std::string>::const_iterator it = includedUis.begin();
+  for(std::map<std::string, std::string>::const_iterator
+      it = includedUis.begin();
       it != includedUis.end();
       ++it)
     {
