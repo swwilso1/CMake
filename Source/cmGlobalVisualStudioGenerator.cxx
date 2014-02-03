@@ -915,7 +915,7 @@ std::string cmGlobalVisualStudioGenerator::ExpandCFGIntDir(
       i = tmp.find(replace, i))
     {
     tmp.replace(i, replace.size(), config);
-    i += (config.size() - replace.size());
+    i += config.size();
     }
   return tmp;
 }

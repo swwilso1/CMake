@@ -3697,14 +3697,14 @@ std::string cmGlobalXCodeGenerator::ExpandCFGIntDir(const std::string& str,
       i = tmp.find(replace1, i))
     {
     tmp.replace(i, replace1.size(), config);
-    i += (config.size() - replace1.size());
+    i += config.size();
     }
   for(std::string::size_type i = tmp.find(replace2);
       i != std::string::npos;
       i = tmp.find(replace2, i))
     {
     tmp.replace(i, replace2.size(), config);
-    i += (config.size() - replace2.size());
+    i += config.size();
     }
   return tmp;
 }
