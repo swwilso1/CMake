@@ -503,7 +503,7 @@ Style
 
   .. code-block:: rst
 
-    This command creates an :ref:`Imported Target`.
+    This command creates an :ref:`<Imported Target <Imported Targets>`.
 
   instead of:
 
@@ -521,12 +521,14 @@ Style
 
     .. _`Imported Targets`:
 
-  creates a suitable anchor.
+  creates a suitable anchor.  Use an anchor name which matches the name
+  of the corresponding section.  Refer to the anchor using a
+  cross-reference with specified text.
 
   Imported Targets need the ``IMPORTED`` term marked up with care in
   particular because the term may refer to a command keyword
   (``IMPORTED``), a target property (:prop_tgt:`IMPORTED`), or a
-  concept (:ref:`Imported Target`).
+  concept (:ref:`Imported Targets`).
 
 11)
   Where a property, command or variable is related conceptually to others,
