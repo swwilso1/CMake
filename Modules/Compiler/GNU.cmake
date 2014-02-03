@@ -55,4 +55,39 @@ macro(__compiler_gnu lang)
   if(NOT APPLE)
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
   endif()
+
+  # LTO/IPO
+  if(NOT CMAKE_GCC_AR OR NOT CMAKE_GCC_RANLIB)
+    if(IS_ABSOLUTE "${CMAKE_${lang}_COMPILER}")
+      string(REGEX MATCH "^([0-9]+.[0-9]+)" _version
+        "${CMAKE_${lang}_COMPILER_VERSION}")
+      get_filename_component(_dir "${CMAKE_${lang}_COMPILER}" DIRECTORY)
+
+      find_program(CMAKE_GCC_AR NAMES
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar"
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar-${_version}"
+      )
+
+      find_program(CMAKE_GCC_RANLIB NAMES
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib"
+        "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib-${_version}"
+      )
+    endif()
+  endif()
+
+  if(CMAKE_GCC_AR AND CMAKE_GCC_RANLIB)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_IPO -flto -fno-fat-lto-objects)
+
+    set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
+      "${CMAKE_GCC_AR} cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+    )
+
+    set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
+      "${CMAKE_GCC_AR} r <TARGET> <LINK_FLAGS> <OBJECTS>"
+    )
+
+    set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
+      "${CMAKE_GCC_RANLIB} <TARGET>"
+    )
+  endif()
 endmacro()
