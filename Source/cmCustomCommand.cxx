@@ -71,31 +71,6 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
-                                 const char* workingDirectory):
-  Outputs(outputs),
-  Depends(depends),
-  CommandLines(commandLines),
-  HaveComment(comment?true:false),
-  Comment(comment?comment:""),
-  WorkingDirectory(workingDirectory?workingDirectory:""),
-  EscapeAllowMakeVars(false),
-  EscapeOldStyle(true),
-  Backtrace(new cmListFileBacktrace)
-{
-  this->EscapeOldStyle = true;
-  this->EscapeAllowMakeVars = false;
-  if(mf)
-    {
-    mf->GetBacktrace(*this->Backtrace);
-    }
-}
-
-//----------------------------------------------------------------------------
-cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
-                                 const std::vector<std::string>& outputs,
-                                 const std::vector<std::string>& depends,
-                                 const cmCustomCommandLines& commandLines,
-                                 const char* comment,
                                  const char* workingDirectory,
                                  const std::string& configName):
   Outputs(outputs),
@@ -107,7 +82,10 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   EscapeOldStyle(true),
   Backtrace(new cmListFileBacktrace)
 {
-  this->ConfigurationCommandLines[configName] = commandLines;
+  if(! configName.empty())
+    this->ConfigurationCommandLines[configName] = commandLines;
+  else
+    this->CommandLines = commandLines;
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
   if(mf)

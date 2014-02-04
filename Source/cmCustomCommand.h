@@ -35,16 +35,8 @@ public:
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
-                  const char* workingDirectory);
-
-  /** Main constructor that contains configuration name. */
-  cmCustomCommand(cmMakefile const* mf,
-                  const std::vector<std::string>& outputs,
-                  const std::vector<std::string>& depends,
-                  const cmCustomCommandLines& commandLines,
-                  const char* comment,
                   const char* workingDirectory,
-                  const std::string& configName);
+                  const std::string& configName = "");
 
   ~cmCustomCommand();
 
