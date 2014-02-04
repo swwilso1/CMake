@@ -182,16 +182,7 @@ public:
     const char* main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
-    bool replace = false,
-    bool escapeOldStyle = true);
-
-  cmSourceFile* AddCustomCommandToOutput(
-    const std::vector<std::string>& outputs,
-    const std::vector<std::string>& depends,
-    const std::string& main_dependency,
-    const cmCustomCommandLines& commandLines,
-    const char* comment, const char* workingDir,
-    const std::string& configName,
+    const std::string& configName = "",
     bool replace = false,
     bool escapeOldStyle = true);
 
@@ -201,16 +192,7 @@ public:
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
-    bool replace = false,
-    bool escapeOldStyle = true);
-
-  cmSourceFile* AddCustomCommandToOutput(
-    const std::string& output,
-    const std::vector<std::string>& depends,
-    const char* main_dependency,
-    const cmCustomCommandLines& commandLines,
-    const char* comment, const char* workingDir,
-    const std::string& configName,
+    const std::string& configName = "",
     bool replace = false,
     bool escapeOldStyle = true);
 
@@ -219,15 +201,8 @@ public:
                                 const std::vector<std::string>& depends,
                                 const std::string& source,
                                 const cmCustomCommandLines& commandLines,
-                                const char* comment);
-
-  void AddCustomCommandOldStyle(const std::string& target,
-                                const std::vector<std::string>& outputs,
-                                const std::vector<std::string>& depends,
-                                const char* source,
-                                const cmCustomCommandLines& commandLines,
                                 const char* comment,
-                                const std::string& configName);
+                                const std::string& configName = "");
   /**
    * Add a define flag to the build.
    */

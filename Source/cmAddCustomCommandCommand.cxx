@@ -331,23 +331,13 @@ bool cmAddCustomCommandCommand
   else if(target.empty())
     {
     // Target is empty, use the output.
-    if(! intendedConfig.empty())
-      {
-      this->Makefile->AddCustomCommandToOutput(output, depends,
-                                               main_dependency.c_str(),
-                                               commandLines, comment,
-                                               working.c_str(),
-                                               intendedConfig, false,
-                                               escapeOldStyle);
-      }
-    else
-      {
-      this->Makefile->AddCustomCommandToOutput(output, depends,
-                                               main_dependency.c_str(),
-                                               commandLines, comment,
-                                               working.c_str(), false,
-                                               escapeOldStyle);
-      }
+
+    this->Makefile->AddCustomCommandToOutput(output, depends,
+                                             main_dependency.c_str(),
+                                             commandLines, comment,
+                                             working.c_str(),
+                                             intendedConfig, false,
+                                             escapeOldStyle);
 
     // Add implicit dependency scanning requests if any were given.
     if(!implicit_depends.empty())
@@ -405,19 +395,10 @@ bool cmAddCustomCommandCommand
       }
 
     // Use the old-style mode for backward compatibility.
-    if(! intendedConfig.empty())
-      {
-      this->Makefile->AddCustomCommandOldStyle(target, outputs,
-                                               depends, source,
-                                               commandLines, comment,
-                                               intendedConfig);
-       }
-    else
-      {
-      this->Makefile->AddCustomCommandOldStyle(target, outputs,
-                                               depends, source,
-                                               commandLines, comment);
-      }
+    this->Makefile->AddCustomCommandOldStyle(target, outputs,
+                                             depends, source,
+                                             commandLines, comment,
+                                             intendedConfig);
     }
 
   return true;
