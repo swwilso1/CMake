@@ -321,21 +321,12 @@ bool cmAddCustomCommandCommand
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    if(! intendedConfig.empty())
-      {
-      this->Makefile->AddCustomCommandToTarget(target, no_depends,
-                                               commandLines, cctype,
-                                               comment, working.c_str(),
-                                               intendedConfig,
-                                               escapeOldStyle);
-      }
-    else
-      {
-      this->Makefile->AddCustomCommandToTarget(target, no_depends,
-                                               commandLines, cctype,
-                                               comment, working.c_str(),
-                                               escapeOldStyle);
-      }
+
+    this->Makefile->AddCustomCommandToTarget(target, no_depends,
+                                             commandLines, cctype,
+                                             comment, working.c_str(),
+                                             intendedConfig,
+                                             escapeOldStyle);
     }
   else if(target.empty())
     {

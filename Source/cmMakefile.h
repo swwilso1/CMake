@@ -172,15 +172,8 @@ public:
                                 const std::vector<std::string>& depends,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
-                                const char* comment, const char* workingDir,
-                                bool escapeOldStyle = true) const;
-
-  void AddCustomCommandToTarget(const char *target,
-                                const std::vector<std::string>& depends,
-                                const cmCustomCommandLines& commandLines,
-                                cmTarget::CustomCommandType type,
                                 const char *comment, const char *workingDir,
-                                const std::string& configName,
+                                const std::string& configName = "",
                                 bool escapeOldStyle = true) const;
 
   cmSourceFile* AddCustomCommandToOutput(
