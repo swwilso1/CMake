@@ -489,6 +489,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string flags = (targetType == cmTarget::EXECUTABLE
                                ? vars["FLAGS"]
                                : vars["ARCH_FLAGS"]);
+
+  this->AddFeatureFlags(flags, this->TargetLinkLanguage);
+
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
                              this->GetGeneratorTarget(),
                              this->TargetLinkLanguage,
