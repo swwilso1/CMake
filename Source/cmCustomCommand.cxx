@@ -135,22 +135,21 @@ const std::vector<std::string>& cmCustomCommand::GetDepends() const
 }
 
 //----------------------------------------------------------------------------
-const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
-{
-  return this->CommandLines;
-}
-
-//----------------------------------------------------------------------------
 const cmCustomCommandLines& cmCustomCommand::GetCommandLines(const
   std::string& configName) const
 {
-  std::map<std::string, cmCustomCommandLines>::const_iterator ci =
-   this->ConfigurationCommandLines.find(configName);
-  if(ci != this->ConfigurationCommandLines.end())
+  if(! configName.empty())
     {
-      return ci->second;
+    std::map<std::string, cmCustomCommandLines>::const_iterator ci =
+     this->ConfigurationCommandLines.find(configName);
+    if(ci != this->ConfigurationCommandLines.end())
+      {
+        return ci->second;
+      }
+    return this->CommandLines;
     }
-  return this->CommandLines;
+  else
+    return this->CommandLines;
 }
 
 //----------------------------------------------------------------------------
@@ -161,27 +160,28 @@ const char* cmCustomCommand::GetComment() const
 }
 
 //----------------------------------------------------------------------------
-void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
-{
-  for(cmCustomCommandLines::const_iterator i=commandLines.begin();
-      i != commandLines.end(); ++i)
-    {
-    this->CommandLines.push_back(*i);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines,
   const std::string& configName)
 {
-  cmCustomCommandLines configLines =
-    this->ConfigurationCommandLines[configName];
-  for(cmCustomCommandLines::const_iterator ci = commandLines.begin();
-    ci != commandLines.end(); ci++)
+  if(! configName.empty())
     {
-      configLines.push_back(*ci);
+    cmCustomCommandLines configLines =
+      this->ConfigurationCommandLines[configName];
+    for(cmCustomCommandLines::const_iterator ci = commandLines.begin();
+      ci != commandLines.end(); ci++)
+      {
+        configLines.push_back(*ci);
+      }
+    this->ConfigurationCommandLines[configName] = configLines;
     }
-  this->ConfigurationCommandLines[configName] = configLines;
+  else
+    {
+    for(cmCustomCommandLines::const_iterator i=commandLines.begin();
+        i != commandLines.end(); ++i)
+      {
+      this->CommandLines.push_back(*i);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -225,30 +225,30 @@ cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
 }
 
 //----------------------------------------------------------------------------
-bool cmCustomCommand::HasCommandLines(void) const
-{
-  if(! this->CommandLines.empty())
-    {
-      return true;
-    }
-  return false;
-}
-
-
-//----------------------------------------------------------------------------
 bool cmCustomCommand::HasCommandLines(const std::string& configName) const
 {
-  if(! this->ConfigurationCommandLines.empty())
-  {
-    for(std::map<std::string,cmCustomCommandLines>::const_iterator ci =
-      this->ConfigurationCommandLines.begin(); ci !=
-      this->ConfigurationCommandLines.end(); ci++)
+  if(! configName.empty())
+    {
+    if(! this->ConfigurationCommandLines.empty())
+    {
+      for(std::map<std::string,cmCustomCommandLines>::const_iterator ci =
+        this->ConfigurationCommandLines.begin(); ci !=
+        this->ConfigurationCommandLines.end(); ci++)
+        {
+          if(configName == ci->first && (! ci->second.empty()))
+            return true;
+        }
+    }
+    return false;
+    }
+  else
+    {
+    if(! this->CommandLines.empty())
       {
-        if(configName == ci->first && (! ci->second.empty()))
-          return true;
+        return true;
       }
-  }
-  return false;
+    return false;
+    }
 }
 
 //----------------------------------------------------------------------------

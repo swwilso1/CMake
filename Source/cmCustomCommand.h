@@ -58,22 +58,16 @@ public:
   std::string const& GetWorkingDirectory() const
     { return this->WorkingDirectory; }
 
-  /** Get the list of command lines.  */
-  const cmCustomCommandLines& GetCommandLines() const;
-
   /** Get the list of command lines for the configuration. */
   const cmCustomCommandLines&
-    GetCommandLines(const std::string& configName) const;
+    GetCommandLines(const std::string& configName = "") const;
 
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
-  /** Append to the list of command lines.  */
-  void AppendCommands(const cmCustomCommandLines& commandLines);
-
   /** Append to the list of command lines for the configuration */
   void AppendCommands(const cmCustomCommandLines& commandLines, const
-    std::string& configName);
+    std::string& configName = "");
 
   /** Append to the list of dependencies.  */
   void AppendDepends(const std::vector<std::string>& depends);
@@ -90,12 +84,9 @@ public:
   /** Backtrace of the command that created this custom command.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
-  /** Check if the custom command has command lines. */
-  bool HasCommandLines(void) const;
-
   /** Check if the customm command has command lines for the
     configuration. */
-  bool HasCommandLines(const std::string& configName) const;
+  bool HasCommandLines(const std::string& configName = "") const;
 
   typedef std::pair<std::string, std::string> ImplicitDependsPair;
   class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
