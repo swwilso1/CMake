@@ -76,18 +76,34 @@ macro(__compiler_gnu lang)
   endif()
 
   if(CMAKE_GCC_AR AND CMAKE_GCC_RANLIB)
-    set(CMAKE_${lang}_COMPILE_OPTIONS_IPO -flto -fno-fat-lto-objects)
+    if(NOT DEFINED CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER)
+      execute_process(COMMAND ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_VERBOSE_FLAG}
+        RESULT_VARIABLE __result
+        ERROR_VARIABLE __output
+        OUTPUT_QUIET
+      )
 
-    set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
-      "${CMAKE_GCC_AR} cr <TARGET> <LINK_FLAGS> <OBJECTS>"
-    )
+      set(__lto_found FALSE)
+      if("${__result}" STREQUAL "0" AND "${__output}" MATCHES "COLLECT_LTO_WRAPPER")
+        set(__lto_found TRUE)
+      endif()
+      set(CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER ${__lto_found} CACHE INTERNAL "")
+    endif()
 
-    set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
-      "${CMAKE_GCC_AR} r <TARGET> <LINK_FLAGS> <OBJECTS>"
-    )
+    if(CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER)
+      set(CMAKE_${lang}_COMPILE_OPTIONS_IPO -flto -fno-fat-lto-objects)
 
-    set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
-      "${CMAKE_GCC_RANLIB} <TARGET>"
-    )
+      set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
+        "${CMAKE_GCC_AR} cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+      )
+
+      set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
+        "${CMAKE_GCC_AR} r <TARGET> <LINK_FLAGS> <OBJECTS>"
+      )
+
+      set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
+        "${CMAKE_GCC_RANLIB} <TARGET>"
+      )
+    endif()
   endif()
 endmacro()
