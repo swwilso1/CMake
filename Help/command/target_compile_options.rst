@@ -15,6 +15,14 @@ named ``<target>`` must have been created by a command such as
 :prop_tgt:`IMPORTED Target`.  If ``BEFORE`` is specified, the content will
 be prepended to the property instead of being appended.
 
+This command can be used to add any options, but
+alternative commands exist to add preprocessor definitions
+(:command:`target_compile_definitions` and :command:`add_definitions`) or
+include directories (:command:`target_include_directories` and
+:command:`include_directories`).  See documentation of the
+:prop_tgt:`directory <COMPILE_OPTIONS>` and
+:prop_tgt:` target <COMPILE_OPTIONS>` ``COMPILE_OPTIONS`` properties.
+
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
 items will populate the :prop_tgt:`COMPILE_OPTIONS` property of
