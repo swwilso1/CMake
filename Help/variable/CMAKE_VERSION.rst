@@ -1,10 +1,10 @@
 CMAKE_VERSION
 -------------
 
-The full version of CMake as up to four non-negative integer components
-separated by periods.  The first three components represent the feature
-level and the fourth component represents either a bug-fix level or
-development date.
+The CMake version string as up to four non-negative integer components
+separated by ``.`` and possibly followed by ``-`` and other information.
+The first three components represent the feature level and the fourth
+component represents either a bug-fix level or development date.
 
 Release versions and release candidate versions of CMake use the format::
 
@@ -26,6 +26,12 @@ Individual component values are also available in variables:
 * :variable:`CMAKE_MINOR_VERSION`
 * :variable:`CMAKE_PATCH_VERSION`
 * :variable:`CMAKE_TWEAK_VERSION`
+
+Use the :command:`if` command ``VERSION_LESS``, ``VERSION_EQUAL``, or
+``VERSION_GREATER`` operators to compare version string values against
+``CMAKE_VERSION`` using a component-wise test.  Version component
+values may be 10 or larger so do not attempt to compare version
+strings as floating-point numbers.
 
 .. note::
 
