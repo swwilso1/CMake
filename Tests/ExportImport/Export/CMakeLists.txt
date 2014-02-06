@@ -187,6 +187,7 @@ set_property(TARGET testLibRequired APPEND PROPERTY
 include(GenerateExportHeader)
 
 add_subdirectory(renamed)
+add_subdirectory(linkoptions)
 
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
 generate_export_header(testSharedLibRequired)
