@@ -91,13 +91,16 @@ the executable is built before attempting to run the command.
 Build Specification and Usage Requirements
 ==========================================
 
-The :command:`target_include_directories`, :command:`target_compile_definitions`
-and :command:`target_compile_options` commands specify the build specifications
-and the usage requirements of binary targets.  The commands populate the
-:prop_tgt:`INCLUDE_DIRECTORIES`, :prop_tgt:`COMPILE_DEFINITIONS` and
-:prop_tgt:`COMPILE_OPTIONS` target properties respectively, and/or the
-:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`, :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`
-and :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.
+The :command:`target_include_directories`, :command:`target_compile_definitions`,
+:command:`target_compile_options`, and :command:`target_link_options` commands
+specify the build specifications and the usage requirements of binary targets.
+The commands populate the :prop_tgt:`INCLUDE_DIRECTORIES`,
+:prop_tgt:`COMPILE_DEFINITIONS`, :prop_tgt:`COMPILE_OPTIONS`, and
+:prop_tgt:`LINK_OPTIONS` target properties respectively, and/or the
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS`, and
+:prop_tgt:`INTERFACE_LINK_OPTIONS` target properties.
 
 Each of the commands has a ``PRIVATE``, ``PUBLIC`` and ``INTERFACE`` mode.  The
 ``PRIVATE`` mode populates only the non-``INTERFACE_`` variant of the target
@@ -140,9 +143,13 @@ Entries in the :prop_tgt:`COMPILE_OPTIONS` are escaped for the shell and added
 in the order of appearance in the property value.  Several compile options have
 special separate handling, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`.
 
+Entries in the :prop_tgt:`LINK_OPTIONS` are escaped for the shell and added
+in the order of appearance in the property value.
+
 The contents of the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
-:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and
-:prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties are
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS`, and
+:prop_tgt:`INTERFACE_LINK_OPTIONS` target properties are
 *Usage Requirements* -- they specify content which consumers
 must use to correctly compile and link with the target they appear on.
 For any binary target, the contents of each ``INTERFACE_`` property on
@@ -678,12 +685,13 @@ Directory-Scoped Commands
 -------------------------
 
 The :command:`target_include_directories`,
-:command:`target_compile_definitions` and
-:command:`target_compile_options` commands have an effect on only one
-target at a time.  The commands :command:`add_definitions`,
-:command:`add_compile_options` and :command:`include_directories` have
-a similar function, but operate at directory scope instead of target
-scope for convenience.
+:command:`target_compile_definitions`,
+:command:`target_compile_options`, and :command:`target_link_options`
+commands have an effect on only one target at a time.
+The commands :command:`add_definitions`,
+:command:`add_compile_options`, :command:`add_link_options`, and
+:command:`include_directories` have a similar function, but operate
+at directory scope instead of target scope for convenience.
 
 Pseudo Targets
 ==============
