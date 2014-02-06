@@ -76,32 +76,33 @@ macro(__compiler_gnu lang)
   endif()
 
   if(CMAKE_GCC_AR AND CMAKE_GCC_RANLIB)
-    if(NOT DEFINED CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER)
+    set(__lto_flags -flto)
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7)
+      list(APPEND __lto_flags -fno-fat-lto-objects)
+    endif()
+
+    if(NOT DEFINED CMAKE_${lang}_PASSED_LTO_TEST)
       execute_process(
-        COMMAND ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_VERBOSE_FLAG}
+        COMMAND ${CMAKE_COMMAND} -E echo "int main() {}"
+        COMMAND ${CMAKE_${lang}_COMPILER} ${__lto_flags} -xc -
+          -o ${CMAKE_PLATFORM_INFO_DIR}/lto-test-${lang}
         RESULT_VARIABLE __result
-        ERROR_VARIABLE __output
+        ERROR_QUIET
         OUTPUT_QUIET
       )
 
       set(__lto_found FALSE)
-      if("${__result}" STREQUAL "0" AND
-        "${__output}" MATCHES "COLLECT_LTO_WRAPPER")
-
+      if("${__result}" STREQUAL "0")
         set(__lto_found TRUE)
       endif()
 
-      set(CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER
+      set(CMAKE_${lang}_PASSED_LTO_TEST
         ${__lto_found} CACHE INTERNAL
-        "If the output of gcc -v contains COLLECT_LTO_WRAPPER")
+        "If the compiler passed a simple LTO test compile")
     endif()
 
-    if(CMAKE_${lang}_HAS_COLLECT_LTO_WRAPPER)
-      set(__lto_flags -flto)
-
-      if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7)
-        list(APPEND __lto_flags -fno-fat-lto-objects)
-      endif()
+    if(CMAKE_${lang}_PASSED_LTO_TEST)
 
       set(CMAKE_${lang}_COMPILE_OPTIONS_IPO ${__lto_flags})
 
