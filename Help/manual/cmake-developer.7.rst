@@ -503,7 +503,7 @@ Style
 
   .. code-block:: rst
 
-    This command creates an :ref:`<Imported Target <Imported Targets>`.
+    This command creates an :ref:`Imported Target <Imported Targets>`.
 
   instead of:
 
