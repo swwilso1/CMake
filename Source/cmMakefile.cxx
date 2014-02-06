@@ -1373,6 +1373,11 @@ void cmMakefile::AddCompileOption(const char* option)
   this->AppendProperty("COMPILE_OPTIONS", option);
 }
 
+void cmMakefile::AddLinkOption(const char* option)
+{
+  this->AppendProperty("LINK_OPTIONS", option);
+}
+
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.

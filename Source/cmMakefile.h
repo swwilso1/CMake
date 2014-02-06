@@ -203,6 +203,7 @@ public:
   void AddDefineFlag(const char* definition);
   void RemoveDefineFlag(const char* definition);
   void AddCompileOption(const char* option);
+  void AddLinkOption(const char *option);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
