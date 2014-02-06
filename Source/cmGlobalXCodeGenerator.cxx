@@ -1803,22 +1803,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
   else
     {
-    const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
-    if(targetLinkFlags)
-      {
-      this->CurrentLocalGenerator->
-        AppendFlags(extraLinkOptions, targetLinkFlags);
-      }
-    if(configName && *configName)
-      {
-      std::string linkFlagsVar = "LINK_FLAGS_";
-      linkFlagsVar += cmSystemTools::UpperCase(configName);
-      if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
-        {
-        this->CurrentLocalGenerator->
-          AppendFlags(extraLinkOptions, linkFlags);
-        }
-      }
+    this->CurrentLocalGenerator
+        ->AddLinkOptions(extraLinkOptions, &target, configName);
     }
 
   // Set target-specific architectures.

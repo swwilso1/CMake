@@ -147,9 +147,9 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
     }
 
   std::string extraFlags;
-  this->LocalGenerator->GetStaticLibraryFlags(extraFlags,
-    cmSystemTools::UpperCase(this->ConfigName), this->Target);
-  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), false);
+  this->LocalGenerator->AddLinkOptions(extraFlags,
+                                        this->Target, this->ConfigName);
+  this->WriteLibraryRules(linkRuleVar, extraFlags, false);
 }
 
 //----------------------------------------------------------------------------
@@ -170,15 +170,15 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   linkRuleVar += "_CREATE_SHARED_LIBRARY";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags
-    (extraFlags, this->Target->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags
-    (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
+  this->LocalGenerator->AddLinkOptions(extraFlags,
+     this->Target, this->ConfigName);
 
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
+
+  this->LocalGenerator->AddLinkOptions(extraFlags,
+    this->Target, this->ConfigName);
+
   this->AddModuleDefinitionFlag(extraFlags);
 
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
