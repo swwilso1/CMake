@@ -49,7 +49,7 @@ properties.
   add_library(<name> <SHARED|STATIC|MODULE|UNKNOWN> IMPORTED
               [GLOBAL])
 
-An :ref:`IMPORTED library target <Imported Target>` references a library
+An :ref:`IMPORTED library target <Imported Targets>` references a library
 file located outside the project.  No rules are generated to build it, and
 the :prop_tgt:`IMPORTED` target property is ``True``.  The target name has
 scope in the directory in which it is created and below, but the ``GLOBAL``
@@ -97,10 +97,10 @@ adding at least one real source file to any target that references
 
   add_library(<name> ALIAS <target>)
 
-Creates an :ref:`Alias Target`, such that ``<name>`` can be
+Creates an :ref:`Alias Target <Alias Targets>`, such that ``<name>`` can be
 used to refer to ``<target>`` in subsequent commands.  The ``<name>`` does
 not appear in the generatedbuildsystem as a make target.  The ``<target>``
-may not be an :ref:`Imported Target` or an ``ALIAS``.
+may not be an :ref:`Imported Target <Imported Targets>` or an ``ALIAS``.
 ``ALIAS`` targets can be used as linkable targets and as targets to
 read properties from.  They can also be tested for existance with the
 regular :command:`if(TARGET)` subcommand.  The ``<name>`` may not be used
@@ -115,21 +115,22 @@ installed or exported.
 
   add_library(<name> INTERFACE [IMPORTED [GLOBAL]])
 
-Creates an :ref:`Interface Library`.  An ``INTERFACE`` library target does
-not directly create build output, though it may have properties set on it
-and it may be installed, exported and imported.  Typically the
-``INTERFACE_*`` properties are populated on the interface target using the
-:command:`set_property`, :command:`target_link_libraries(INTERFACE)`,
+Creates an :ref:`Interface Library <Interface Libraries>`.  An ``INTERFACE``
+library target does not directly create build output, though it may
+have properties set on it and it may be installed, exported and
+imported. Typically the ``INTERFACE_*`` properties are populated on
+the interface target using the :command:`set_property`,
+:command:`target_link_libraries(INTERFACE)`,
 :command:`target_include_directories(INTERFACE)`,
 :command:`target_compile_options(INTERFACE)`
 and :command:`target_compile_definitions(INTERFACE)` commands, and then it
 is used as an argument to :command:`target_link_libraries` like any other
 target.
 
-An ``INTERFACE`` :ref:`Imported Target` may also be created with this
-signature.  An ``IMPORTED`` library target references a library defined
-outside the project.  The target name has scope in the directory in which
-it is created and below, but the ``GLOBAL`` option extends visibility.  It
-may be referenced like any target built within the project.  ``IMPORTED``
-libraries are useful for convenient reference from commands like
-:command:`target_link_libraries`.
+An ``INTERFACE`` :ref:`Imported Target <Imported Targets>` may also be
+created with this signature.  An ``IMPORTED`` library target references a
+library defined outside the project.  The target name has scope in the
+directory in which it is created and below, but the ``GLOBAL`` option
+extends visibility.  It may be referenced like any target built within
+the project.  ``IMPORTED`` libraries are useful for convenient reference
+from commands like :command:`target_link_libraries`.

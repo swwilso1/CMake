@@ -44,7 +44,7 @@ buildsystem properties.
 
   add_executable(<name> IMPORTED [GLOBAL])
 
-An :ref:`IMPORTED executable target <Imported Target>` references an
+An :ref:`IMPORTED executable target <Imported Targets>` references an
 executable file located outside the project.  No rules are generated to
 build it, and the :prop_tgt:`IMPORTED` target property is ``True``.  The
 target name has scope in the directory in which it is created and below, but
@@ -64,10 +64,10 @@ properties for more information.
 
   add_executable(<name> ALIAS <target>)
 
-Creates an :ref:`Alias Target`, such that ``<name>`` can
+Creates an :ref:`Alias Target <Alias Targets>`, such that ``<name>`` can
 be used to refer to ``<target>`` in subsequent commands.  The ``<name>``
 does not appear in the generated buildsystem as a make target.  The
-``<target>`` may not be an :ref:`Imported Target` or an
+``<target>`` may not be an :ref:`Imported Target <Imported Targets>` or an
 ``ALIAS``.  ``ALIAS`` targets can be used as targets to read properties
 from, executables for custom commands and custom targets.  They can also be
 tested for existance with the regular :command:`if(TARGET)` subcommand.
