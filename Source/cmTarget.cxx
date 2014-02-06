@@ -2344,7 +2344,7 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-static void processCompileOptionsInternal(cmTarget const* tgt,
+static void processOptionsInternal(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
       std::set<std::string> &uniqueOptions,
@@ -2394,7 +2394,7 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
     if (!usedOptions.empty())
       {
       mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
-                            std::string("Used compile ") + logName
+                            std::string("Used ") + logName
                             + std::string(" for target ")
                             + tgt->GetName() + ":\n"
                             + usedOptions, (*it)->ge->GetBacktrace());
@@ -2410,8 +2410,8 @@ static void processCompileOptions(cmTarget const* tgt,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugOptions)
 {
-  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                dagChecker, config, debugOptions, "options");
+  processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
+                         config, debugOptions, "compile options");
 }
 
 //----------------------------------------------------------------------------
@@ -2691,8 +2691,9 @@ static void processCompileFeatures(cmTarget const* tgt,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugOptions)
 {
-  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                dagChecker, config, debugOptions, "features");
+  processOptionsInternal(tgt, entries, options, uniqueOptions,
+                         dagChecker, config, debugOptions,
+                         "compile definitions");
 }
 
 //----------------------------------------------------------------------------
