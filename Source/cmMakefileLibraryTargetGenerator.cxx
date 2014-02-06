@@ -149,7 +149,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
   std::string extraFlags;
   this->LocalGenerator->AddLinkOptions(extraFlags,
                                         this->Target, this->ConfigName);
-  this->WriteLibraryRules(linkRuleVar, extraFlags, false);
+  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), false);
 }
 
 //----------------------------------------------------------------------------
