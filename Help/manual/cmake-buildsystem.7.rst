@@ -668,7 +668,7 @@ Some target types do not represent outputs of the buildsystem, but only inputs
 such as external dependencies, aliases or other non-build artifacts.  Pseudo
 targets are not represented in the generated buildsystem.
 
-.. _`Imported Target`:
+.. _`Imported Targets`:
 
 Imported Targets
 ----------------
@@ -706,7 +706,7 @@ accessible globally in the buildsystem.
 See the :manual:`cmake-packages(7)` manual for more on creating packages
 with :prop_tgt:`IMPORTED` targets.
 
-.. _`Alias Target`:
+.. _`Alias Targets`:
 
 Alias Targets
 -------------
@@ -749,7 +749,7 @@ property from it:
     message(STATUS "The name Upstream::lib1 is an ALIAS for ${_aliased}.")
   endif()
 
-.. _`Interface Library`:
+.. _`Interface Libraries`:
 
 Interface Libraries
 -------------------

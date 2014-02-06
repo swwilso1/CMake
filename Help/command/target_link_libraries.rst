@@ -29,7 +29,7 @@ the Debug configuration (or to configurations named in the
 ``general`` keyword corresponds to all configurations, and is purely
 optional (assumed if omitted).  Higher granularity may be achieved for
 per-configuration rules by creating and linking to
-:ref:`IMPORTED library targets <Imported Target>`.
+:ref:`IMPORTED library targets <Imported Targets>`.
 
 Library dependencies are transitive by default with this signature.
 When this target is linked into another target then the libraries
