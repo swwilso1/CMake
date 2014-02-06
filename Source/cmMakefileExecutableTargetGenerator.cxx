@@ -220,12 +220,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                              linkLanguage, this->ConfigName);
 
   // Add target-specific linker flags.
-  this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty(linkFlagsConfig));
+  this->LocalGenerator->AddLinkOptions(linkFlags,
+    this->Target, this->ConfigName);
 
   this->AddModuleDefinitionFlag(linkFlags);
 

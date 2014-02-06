@@ -463,6 +463,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           &genTarget,
                           useWatcomQuote);
 
+  localGen.AddLinkOptions(
+    vars["LINK_FLAGS"], this->GetTarget(), this->GetConfigName());
+
   this->addPoolNinjaVariable("JOB_POOL_LINK", &target, vars);
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);

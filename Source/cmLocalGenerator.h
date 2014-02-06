@@ -238,6 +238,8 @@ public:
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
                              const std::string& config);
+  void AddLinkOptions(std::string& flags, cmTarget* target,
+                      const std::string& config);
 
   /** Compute the language used to compile the given source file.  */
   std::string GetSourceFileLanguage(const cmSourceFile& source);

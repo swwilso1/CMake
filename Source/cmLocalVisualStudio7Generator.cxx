@@ -990,21 +990,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       + GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName);
     }
 
-  const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
-  if(targetLinkFlags)
-    {
-    extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
-    }
-  std::string configTypeUpper = cmSystemTools::UpperCase(configName);
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += configTypeUpper;
-  targetLinkFlags = target.GetProperty(linkFlagsConfig.c_str());
-  if(targetLinkFlags)
-    {
-    extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
-    }
+  this->AddLinkOptions(extraLinkOptions, &target, configName);
+
   Options linkOptions(this, Options::Linker,
                       cmLocalVisualStudio7GeneratorLinkFlagTable);
   linkOptions.Parse(extraLinkOptions.c_str());
@@ -1058,6 +1045,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         }
       }
     std::string libflags;
+    std::string configTypeUpper = cmSystemTools::UpperCase(configName);
     this->GetStaticLibraryFlags(libflags, configTypeUpper, &target);
     if(!libflags.empty())
       {

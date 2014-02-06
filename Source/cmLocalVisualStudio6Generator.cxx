@@ -1234,39 +1234,14 @@ void cmLocalVisualStudio6Generator
     }
 
   // Get extra linker options for this target.
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
-    {
-    extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
-    {
-    extraLinkOptionsDebug += " ";
-    extraLinkOptionsDebug += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELEASE"))
-    {
-    extraLinkOptionsRelease += " ";
-    extraLinkOptionsRelease += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_MINSIZEREL"))
-    {
-    extraLinkOptionsMinSizeRel += " ";
-    extraLinkOptionsMinSizeRel += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags =
-     target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
-    {
-    extraLinkOptionsRelWithDebInfo += " ";
-    extraLinkOptionsRelWithDebInfo += targetLinkFlags;
-    }
-
-
-
+  this->AddLinkOptions(extraLinkOptions, &target, 0);
+  this->AddLinkOptions(extraLinkOptionsDebug, &target, "Debug");
+  this->AddLinkOptions(extraLinkOptionsRelease,
+    &target, "Release");
+  this->AddLinkOptions(extraLinkOptionsMinSizeRel,
+    &target, "MinSizeRel");
+  this->AddLinkOptions(extraLinkOptionsRelWithDebInfo,
+    &target, "RelWithDebInfo");
 
   // Get standard libraries for this language.
   if(targetBuilds)

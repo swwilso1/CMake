@@ -1594,19 +1594,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   flags += " ";
   flags += this->
     Target->GetMakefile()->GetRequiredDefinition(linkFlagVar.c_str());
-  const char* targetLinkFlags = this->Target->GetProperty("LINK_FLAGS");
-  if(targetLinkFlags)
-    {
-    flags += " ";
-    flags += targetLinkFlags;
-    }
-  std::string flagsProp = "LINK_FLAGS_";
-  flagsProp += CONFIG;
-  if(const char* flagsConfig = this->Target->GetProperty(flagsProp.c_str()))
-    {
-    flags += " ";
-    flags += flagsConfig;
-    }
+  this->LocalGenerator->AddLinkOptions(flags, this->Target, config.c_str());
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
   standardLibsVar += "_STANDARD_LIBRARIES";

@@ -1518,6 +1518,32 @@ void cmLocalGenerator::AddCompileOptions(
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AddLinkOptions(
+  std::string& flags, cmTarget* target,
+  const std::string& config
+  )
+{
+  // Use all flags.
+  if(const char* targetFlags = target->GetProperty("LINK_FLAGS"))
+    {
+    // LINK_FLAGS are not escaped for historical reasons.
+    this->AppendFlags(flags, targetFlags);
+    }
+
+  // Get flags for the configuration.
+  std::string flagsNameWithConfig = std::string("LINK_FLAGS");
+  std::string theConfig(config);
+  std::transform(theConfig.begin(), theConfig.end(),
+    theConfig.begin(), toupper);
+  flagsNameWithConfig += "_" + theConfig;
+  if(const char *targetFlagsForConfig =
+    target->GetProperty(flagsNameWithConfig.c_str()))
+    {
+    this->AppendFlags(flags, targetFlagsForConfig);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const std::string& lang,
