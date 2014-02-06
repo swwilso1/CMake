@@ -25,6 +25,7 @@
   SELECT(F, EvaluatingSystemIncludeDirectories, SYSTEM_INCLUDE_DIRECTORIES) \
   SELECT(F, EvaluatingCompileDefinitions,       COMPILE_DEFINITIONS) \
   SELECT(F, EvaluatingCompileOptions,           COMPILE_OPTIONS) \
+  SELECT(F, EvaluatingLinkOptions,              LINK_OPTIONS) \
   SELECT(F, EvaluatingAutoUicOptions,           AUTOUIC_OPTIONS) \
   SELECT(F, EvaluatingSources,                  SOURCES) \
   SELECT(F, EvaluatingCompileFeatures,          COMPILE_FEATURES)

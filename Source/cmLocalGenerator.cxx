@@ -1549,6 +1549,15 @@ void cmLocalGenerator::AddLinkOptions(
     {
     this->AppendFlags(flags, targetFlagsForConfig);
     }
+
+  std::vector<std::string> opts;
+  target->GetLinkOptions(opts, config);
+  for(std::vector<std::string>::const_iterator i = opts.begin();
+      i != opts.end(); ++i)
+    {
+    // LINK_OPTIONS are escaped.
+    this->AppendFlagEscape(flags, i->c_str());
+    }
 }
 
 //----------------------------------------------------------------------------

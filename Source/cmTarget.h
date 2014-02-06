@@ -543,11 +543,15 @@ public:
   void InsertCompileOption(const cmValueWithOrigin &entry,
                      bool before = false);
   void InsertCompileDefinition(const cmValueWithOrigin &entry);
+  void InsertLinkOption(const cmValueWithOrigin &entry,
+                  bool before = false);
 
   void AppendBuildInterfaceIncludes();
 
   void GetCompileOptions(std::vector<std::string> &result,
                          const std::string& config) const;
+  void GetLinkOptions(std::vector<std::string> &result,
+                      const std::string& config) const;
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const std::string& config) const;
   void GetCompileFeatures(std::vector<std::string> &features,
@@ -725,6 +729,7 @@ private:
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool DebugCompileFeaturesDone;
+  mutable bool DebugLinkOptionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   mutable std::map<std::string, std::string> MaxLanguageStandards;
   bool BuildInterfaceIncludesAppended;
