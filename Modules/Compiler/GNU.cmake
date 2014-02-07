@@ -83,16 +83,40 @@ macro(__compiler_gnu lang)
     endif()
 
     if(NOT DEFINED CMAKE_${lang}_PASSED_LTO_TEST)
+      set(__output_dir "${CMAKE_PLATFORM_INFO_DIR}/LtoTest${lang}")
+      file(MAKE_DIRECTORY "${__output_dir}")
+      set(__output_base "${__output_dir}/lto-test-${lang}")
+
       execute_process(
-        COMMAND ${CMAKE_COMMAND} -E echo "int main() {}"
-        COMMAND ${CMAKE_${lang}_COMPILER} ${__lto_flags} -xc -
-          -o ${CMAKE_PLATFORM_INFO_DIR}/lto-test-${lang}
+        COMMAND ${CMAKE_COMMAND} -E echo "void foo() {}"
+        COMMAND ${CMAKE_${lang}_COMPILER} ${__lto_flags} -c -xc -
+          -o ${__output_base}.o
         RESULT_VARIABLE __result
         ERROR_QUIET
         OUTPUT_QUIET
       )
 
-      set(__lto_found FALSE)
+      if("${__result}" STREQUAL "0")
+        execute_process(
+          COMMAND ${CMAKE_GCC_AR} cr ${__output_base}.a ${__output_base}.o
+          COMMAND ${CMAKE_GCC_RANLIB} ${__output_base}.a
+          RESULT_VARIABLE __result
+          ERROR_QUIET
+          OUTPUT_QUIET
+        )
+      endif()
+
+      if("${__result}" STREQUAL "0")
+        execute_process(
+          COMMAND ${CMAKE_COMMAND} -E echo "void foo(); int main() {foo();}"
+          COMMAND ${CMAKE_${lang}_COMPILER} ${__lto_flags} -xc -
+            -x none ${__output_base}.a -o ${__output_base}
+          RESULT_VARIABLE __result
+          ERROR_QUIET
+          OUTPUT_QUIET
+        )
+      endif()
+
       if("${__result}" STREQUAL "0")
         set(__lto_found TRUE)
       endif()
