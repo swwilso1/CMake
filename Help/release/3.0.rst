@@ -98,6 +98,14 @@ Commands
   makes it easy to export from the build tree the same targets that
   are exported from the install tree.
 
+* The :command:`export` command learned to work with multiple dependent
+  export sets, thus allowing multiple packages to be built and exported
+  from a single tree.  The feature requires CMake to wait until the
+  generation step to write the output file.  This means one should not
+  :command:`include` the generated targets file later during project
+  configuration because it will not be available.
+  Use :ref:`Alias Targets` instead.  See policy :policy:`CMP0024`.
+
 * The :command:`project` command learned to set some version variables
   to values specified by the new ``VERSION`` option or to empty strings.
   See policy :policy:`CMP0048`.
@@ -354,12 +362,6 @@ Other Changes
 * The :variable:`CMAKE_<LANG>_COMPILER_ID` value for ``qcc`` on QNX
   is now ``QCC``.  It must be distinct from ``GNU`` because the
   command-line options differ.  See policy :policy:`CMP0047`.
-
-* The :command:`export` command was changed to wait until the
-  generation step to write the output file.  This means one should not
-  :command:`include` the generated targets file later during project
-  configuration.  Use :ref:`Alias Targets` instead.
-  See policy :policy:`CMP0024`.
 
 * On 64-bit OS X the :variable:`CMAKE_HOST_SYSTEM_PROCESSOR` value
   is now correctly detected as ``x86_64`` instead of ``i386``.
