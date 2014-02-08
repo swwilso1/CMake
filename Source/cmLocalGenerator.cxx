@@ -1523,6 +1523,14 @@ void cmLocalGenerator::AddLinkOptions(
   const std::string& config
   )
 {
+  if(target->GetType() == cmTarget::OBJECT_LIBRARY ||
+     target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    this->GetStaticLibraryFlags(flags,
+                                cmSystemTools::UpperCase(config),
+                                target);
+    }
+
   // Use all flags.
   if(const char* targetFlags = target->GetProperty("LINK_FLAGS"))
     {
