@@ -157,6 +157,7 @@ void cmMakefile::Initialize()
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
+  this->cmNamedCurly.compile("^[A-Za-z0-9/_.+-]+{");
 
   // Enter a policy level for this directory.
   this->PushPolicy();
@@ -2524,6 +2525,20 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source) const
   return this->ExpandVariablesInString(source, false, false);
 }
 
+typedef enum
+  {
+  NORMAL,
+  ENVIRONMENT,
+  CACHE
+  } t_domain;
+struct t_lookup
+  {
+  const char* anchor;
+  const char* start;
+  t_domain domain;
+  std::string lookup;
+  };
+
 const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool escapeQuotes,
                                                 bool noEscapes,
@@ -2531,30 +2546,23 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 const char* filename,
                                                 long line,
                                                 bool removeEmpty,
-                                                bool replaceAt) const
+                                                bool /*replaceAt*/) const
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
     return source.c_str();
     }
 
-  // Special-case the @ONLY mode.
-  if(atOnly)
-    {
-    if(!noEscapes || !removeEmpty || !replaceAt)
-      {
-      // This case should never be called.  At-only is for
-      // configure-file/string which always does no escapes.
-      this->IssueMessage(cmake::INTERNAL_ERROR,
-                         "ExpandVariablesInString @ONLY called "
-                         "on something with escapes.");
-      }
+  std::string atwork = source;
 
+  // Replace @var@ instances.
+  if(atwork.find("@") != atwork.npos)
+    {
     // Store an original copy of the input.
-    std::string input = source;
+    std::string input = atwork;
 
     // Start with empty output.
-    source = "";
+    atwork = "";
 
     // Look for one @VAR@ at a time.
     const char* in = input.c_str();
@@ -2565,7 +2573,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       const char* last =  in + this->cmAtVarRegex.end();
 
       // Store the unchanged part of the string now.
-      source.append(in, first-in);
+      atwork.append(in, first-in);
 
       // Lookup the definition of VAR.
       std::string var(first+1, last-first-2);
@@ -2574,12 +2582,16 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         // Store the value in the output escaping as requested.
         if(escapeQuotes)
           {
-          source.append(cmSystemTools::EscapeQuotes(val));
+          atwork.append(cmSystemTools::EscapeQuotes(val));
           }
         else
           {
-          source.append(val);
+          atwork.append(val);
           }
+        }
+      else if (!removeEmpty)
+        {
+        atwork.append(first, last);
         }
 
       // Continue looking for @VAR@ further along the string.
@@ -2587,8 +2599,22 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       }
 
     // Append the rest of the unchanged part of the string.
-    source.append(in);
+    atwork.append(in);
+    }
 
+  if(atOnly)
+    {
+    // Sanity check the @ONLY mode.
+    if(!noEscapes || !removeEmpty)
+      {
+      // This case should never be called.  At-only is for
+      // configure-file/string which always does no escapes.
+      this->IssueMessage(cmake::INTERNAL_ERROR,
+                          "ExpandVariablesInString @ONLY called "
+                          "on something with escapes.");
+      }
+
+    source = atwork;
     return source.c_str();
     }
 
@@ -2597,69 +2623,280 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
 
-  cmCommandArgumentParserHelper parser;
-  parser.SetMakefile(this);
-  parser.SetLineFile(line, filename);
-  parser.SetEscapeQuotes(escapeQuotes);
-  parser.SetNoEscapeMode(noEscapes);
-  parser.SetReplaceAtSyntax(replaceAt);
-  parser.SetRemoveEmpty(removeEmpty);
-  int res = parser.ParseString(source.c_str(), 0);
-  const char* emsg = parser.GetError();
-  if ( res && !emsg[0] )
+  std::string work;
+  const char* in = atwork.c_str();
+  const char* last = in;
+  std::stack<t_lookup> openstack;
+  std::string estr;
+  bool error = false;
+  bool done = false;
+
+#define PUSH(args)           \
+  do                         \
+    {                        \
+    if(!openstack.empty())   \
+      {                      \
+      openstack.top()        \
+        .lookup.append args; \
+      }                      \
+    else                     \
+      {                      \
+      work.append args;      \
+      }                      \
+    } while(false)
+
+  do
     {
-    source = parser.GetResult();
+    // Try and skip some more all at once while we're here.
+    in += strcspn(in, "}$\\\n");
+    switch(*in)
+      {
+      case '}':
+        if(!openstack.empty())
+          {
+          t_lookup var = openstack.top();
+          openstack.pop();
+          std::string lookup = var.lookup;
+          if(lookup.empty())
+            {
+            lookup.append(var.start, in);
+            }
+          else
+            {
+            lookup.append(last, in);
+            }
+          const char* value = NULL;
+          switch(var.domain)
+            {
+            case NORMAL:
+              if(filename && lookup == "CMAKE_CURRENT_LIST_LINE")
+                {
+                cmOStringStream ostr;
+                ostr << line;
+                PUSH((ostr.str()));
+                }
+              else
+                {
+                value = this->GetDefinition(lookup.c_str());
+                }
+              break;
+            case ENVIRONMENT:
+              value = cmSystemTools::GetEnv(lookup.c_str());
+              break;
+            case CACHE:
+              value = this->GetCacheManager()->GetCacheValue(lookup.c_str());
+              break;
+            }
+          // Get the string we're meant to append to.
+          std::string result;
+          if(value)
+            {
+            if(escapeQuotes)
+              {
+              result = cmSystemTools::EscapeQuotes(value);
+              }
+            else
+              {
+              result = value;
+              }
+            }
+          else if(!removeEmpty)
+            {
+            // check to see if we need to print a warning
+            // if strict mode is on and the variable has
+            // not been "cleared"/initialized with a set(foo ) call
+            if(this->GetCMakeInstance()->GetWarnUninitialized() &&
+               !this->VariableInitialized(lookup.c_str()))
+              {
+              if (this->CheckSystemVars ||
+                  cmSystemTools::IsSubDirectory(filename,
+                                                this->GetHomeDirectory()) ||
+                  cmSystemTools::IsSubDirectory(filename,
+                                             this->GetHomeOutputDirectory()))
+                {
+                cmOStringStream msg;
+                cmListFileBacktrace bt;
+                cmListFileContext lfc;
+                lfc.FilePath = filename;
+                lfc.Line = line;
+                bt.push_back(lfc);
+                msg << "uninitialized variable \'" << lookup << "\'";
+                this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
+                                                       msg.str().c_str(), bt);
+                }
+              }
+            }
+          PUSH((result));
+          // Start looking from here on out.
+          last = in + 1;
+          }
+        break;
+      case '$':
+        {
+        bool good = true;
+        t_lookup lookup;
+        lookup.anchor = in;
+        const char* next = in + 1;
+        char nextc = *next;
+        if(nextc == '{')
+          {
+          // Looking for a variable.
+          lookup.start = in + 2;
+          lookup.domain = NORMAL;
+          }
+        else if(nextc == '<')
+          {
+          good = false;
+          }
+        else if(!nextc)
+          {
+          PUSH((last, next));
+          last = next;
+          good = false;
+          }
+        else if(cmHasLiteralPrefix(next, "ENV{"))
+          {
+          // Looking for an environment variable.
+          lookup.start = in + 5;
+          lookup.domain = ENVIRONMENT;
+          }
+        else if(cmHasLiteralPrefix(next, "CACHE{"))
+          {
+          // Looking for a cache variable.
+          lookup.start = in + 7;
+          lookup.domain = CACHE;
+          }
+        else
+          {
+          if(this->cmNamedCurly.find(next))
+            {
+            estr = "Syntax $"
+                 + std::string(next, this->cmNamedCurly.end())
+                 + "{} is not supported.  Only ${}, $ENV{}, "
+                   "and $CACHE{} are allowed.";
+            error = true;
+            }
+          good = false;
+          }
+        if(good)
+          {
+          PUSH((last, in));
+          last = lookup.start;
+          openstack.push(lookup);
+          }
+        break;
+        }
+      case '\\':
+        if(!noEscapes)
+          {
+          const char* next = in + 1;
+          char nextc = *next;
+          if(nextc == 't')
+            {
+            PUSH((last, in));
+            PUSH(("\t"));
+            last = next + 1;
+            }
+          else if(nextc == 'n')
+            {
+            PUSH((last, in));
+            PUSH(("\n"));
+            last = next + 1;
+            }
+          else if(nextc == 'r')
+            {
+            PUSH((last, in));
+            PUSH(("\r"));
+            last = next + 1;
+            }
+          else if(nextc == ';')
+            {
+            // Do nothing?
+            }
+          else
+            {
+            // Take what we've found so far, skipping the escape character.
+            PUSH((last, in));
+            // Start tracking from the next character.
+            last = in + 1;
+            }
+          // Skip the next character since it was escaped, but don't read past
+          // the end of the string.
+          if(*last)
+            {
+            ++in;
+            }
+          }
+        break;
+      case '\n':
+        // Onto the next line.
+        ++line;
+        break;
+      case '\0':
+        done = true;
+        break;
+      default:
+        break;
+      }
+    // Look at the next character.
+    } while(!error && !done && *++in);
+
+  // Errors are fatal by default.
+  cmake::MessageType mtype = cmake::FATAL_ERROR;
+
+  // Check for open variable references yet.
+  if(!openstack.empty())
+    {
+    // There's an open variable reference waiting.  Use policy CMP0010 to
+    // decide whether it is an error.
+    switch(this->GetPolicyStatus(cmPolicies::CMP0010))
+      {
+      case cmPolicies::WARN:
+        estr += "\n" + this->GetPolicies()
+                       ->GetPolicyWarning(cmPolicies::CMP0010);
+      case cmPolicies::OLD:
+        // OLD behavior is to just warn and continue.
+        mtype = cmake::AUTHOR_WARNING;
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        estr += "\n" + this->GetPolicies()
+                       ->GetRequiredPolicyError(cmPolicies::CMP0010);
+      case cmPolicies::NEW:
+        // NEW behavior is to report the error.
+        cmSystemTools::SetFatalErrorOccured();
+        break;
+      }
+    error = true;
     }
-  else
+
+  if(error)
     {
-    // Construct the main error message.
-    cmOStringStream error;
-    error << "Syntax error in cmake code ";
-    if(filename && line > 0)
+    cmOStringStream emsg;
+    emsg << "Syntax error in cmake code ";
+    if(filename)
       {
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      error << "at\n"
+      emsg << "at\n"
             << "  " << filename << ":" << line << "\n";
       }
-    error << "when parsing string\n"
-          << "  " << source.c_str() << "\n";
-    error << emsg;
-
-    // If the parser failed ("res" is false) then this is a real
-    // argument parsing error, so the policy applies.  Otherwise the
-    // parser reported an error message without failing because the
-    // helper implementation is unhappy, which has always reported an
-    // error.
-    cmake::MessageType mtype = cmake::FATAL_ERROR;
-    if(!res)
-      {
-      // This is a real argument parsing error.  Use policy CMP0010 to
-      // decide whether it is an error.
-      switch(this->GetPolicyStatus(cmPolicies::CMP0010))
-        {
-        case cmPolicies::WARN:
-          error << "\n"
-                << (this->GetPolicies()
-                    ->GetPolicyWarning(cmPolicies::CMP0010));
-        case cmPolicies::OLD:
-          // OLD behavior is to just warn and continue.
-          mtype = cmake::AUTHOR_WARNING;
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-          error << "\n"
-                << (this->GetPolicies()
-                    ->GetRequiredPolicyError(cmPolicies::CMP0010));
-        case cmPolicies::NEW:
-          // NEW behavior is to report the error.
-          cmSystemTools::SetFatalErrorOccured();
-          break;
-        }
-      }
-    this->IssueMessage(mtype, error.str());
+    emsg << "when parsing string\n"
+         << "  " << source << "\n";
+    emsg << estr;
+    this->IssueMessage(mtype, emsg.str());
     }
+  else
+    {
+    // Append the rest of the unchanged part of the string.
+    PUSH((last));
+
+    source = work;
+    }
+
+#undef PUSH
+
   return source.c_str();
 }
 
