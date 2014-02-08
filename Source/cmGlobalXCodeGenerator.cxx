@@ -1791,19 +1791,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                configName);
     }
 
-  if(target.GetType() == cmTarget::OBJECT_LIBRARY ||
-     target.GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    this->CurrentLocalGenerator
-      ->GetStaticLibraryFlags(extraLinkOptions,
-                              cmSystemTools::UpperCase(configName),
-                              &target);
-    }
-  else
-    {
-    this->CurrentLocalGenerator
-        ->AddLinkOptions(extraLinkOptions, &target, configName);
-    }
+  this->CurrentLocalGenerator
+      ->AddLinkOptions(extraLinkOptions, &target, configName);
 
   // Set target-specific architectures.
   std::vector<std::string> archs;
