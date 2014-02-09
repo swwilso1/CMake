@@ -366,6 +366,16 @@ void cmTarget::SetMakefile(cmMakefile* mf)
       {
       this->InsertCompileOption(*it);
       }
+
+    const std::vector<cmValueWithOrigin> parentLinkOptions =
+                                this->Makefile->GetLinkOptionsEntries();
+
+    for (std::vector<cmValueWithOrigin>::const_iterator it
+                = parentLinkOptions.begin(); it != parentLinkOptions.end();
+                ++it)
+      {
+      this->InsertLinkOption(*it);
+      }
     }
 
   if (this->GetType() != INTERFACE_LIBRARY)

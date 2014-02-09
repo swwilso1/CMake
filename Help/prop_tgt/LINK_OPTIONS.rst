@@ -6,8 +6,9 @@ List of options to pass to the linker.
 This property specifies the list of options specified so far for this
 property.
 
-The generators use this ``LINK_OPTIONS`` target property to set the
-options for the linker.
+CMake initializes this property from the :prop_dir:`LINK_OPTIONS` directory
+property.   The generators use this ``LINK_OPTIONS`` target property to set the options
+for the linker.
 
 Contents of ``LINK_OPTIONS`` may use "generator expressions" with the syntax
 ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for

@@ -60,6 +60,7 @@ Properties on Directories
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION
    /prop_dir/LINK_DIRECTORIES
+   /prop_dir/LINK_OPTIONS
    /prop_dir/LISTFILE_STACK
    /prop_dir/MACROS
    /prop_dir/PARENT_DIRECTORY
