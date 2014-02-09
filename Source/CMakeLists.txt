@@ -129,9 +129,6 @@ set(SRCS
   cmCacheManager.h
   "${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx"
   cmCommands.h
-  cmCommandArgumentLexer.cxx
-  cmCommandArgumentParser.cxx
-  cmCommandArgumentParserHelper.cxx
   cmComputeComponentGraph.cxx
   cmComputeComponentGraph.h
   cmComputeLinkDepends.cxx
