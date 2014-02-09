@@ -15,6 +15,8 @@ if(WIN32)
   set_property(TARGET winmain PROPERTY LINK_OPTIONS "/SUBSYSTEM:CONSOLE" "/ENTRY:mywinmain")
 endif()
 
+add_subdirectory(dirscope)
+
 file(WRITE
   "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
   "int main() { return 0; }

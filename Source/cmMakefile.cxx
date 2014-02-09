@@ -1596,6 +1596,12 @@ void cmMakefile::InitializeFromParent()
                                          parentDefines.begin(),
                                          parentDefines.end());
 
+  const std::vector<cmValueWithOrigin> parentLinkOptions =
+                                      parent->GetLinkOptionsEntries();
+  this->LinkOptionsEntries.insert(this->LinkOptionsEntries.end(),
+                               parentLinkOptions.begin(),
+                               parentLinkOptions.end());
+
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
   // define flags
@@ -3613,6 +3619,18 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->CompileDefinitionsEntries.push_back(entry);
     return;
     }
+  if (propname == "LINK_OPTIONS")
+    {
+    this->LinkOptionsEntries.clear();
+    if (!value)
+      {
+      return;
+      }
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->LinkOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
+    return;
+    }
 
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
@@ -3667,6 +3685,13 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
     this->CompileDefinitionsEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
+    }
+  if (propname == "LINK_OPTIONS")
+    {
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->LinkOptionsEntries.push_back(
+                                 cmValueWithOrigin(value, lfbt));
     }
   if ( propname == "LINK_DIRECTORIES" )
     {
@@ -3814,6 +3839,20 @@ const char *cmMakefile::GetProperty(const char* prop,
     for (std::vector<cmValueWithOrigin>::const_iterator
         it = this->CompileDefinitionsEntries.begin(),
         end = this->CompileDefinitionsEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  else if (!strcmp("LINK_OPTIONS",prop))
+    {
+    std::string sep;
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->LinkOptionsEntries.begin(),
+        end = this->LinkOptionsEntries.end();
         it != end; ++it)
       {
       output += sep;
