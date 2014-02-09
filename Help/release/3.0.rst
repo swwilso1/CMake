@@ -234,7 +234,7 @@ Modules
 
 * A new ``find_dependency`` macro introduced in the
   :module:`CMakeFindDependencyMacro` module to find transitive dependencies
-  in a :ref:`package configuration file <cmake-packages(7)>`. Such
+  in a :manual:`package configuration file <cmake-packages(7)>`. Such
   dependencies are omitted by the listing of the :module:`FeatureSummary`
   module.
 
