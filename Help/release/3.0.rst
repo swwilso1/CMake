@@ -123,6 +123,14 @@ Commands
 * The :command:`ctest_update` command learned to update work trees
   managed by the Perforce (p4) version control tool.
 
+* The :command:`message` command learned a ``DEPRECATION`` mode. Such
+  messages are not issued by default, but may be issued as a warning if
+  :variable:`CMAKE_WARN_DEPRECATED` is enabled, or as an error if
+  :variable:`CMAKE_ERROR_DEPRECATED` is enabled.
+
+* The :command:`target_link_libraries` command now allows repeated use of
+  the ``LINK_PUBLIC`` and ``LINK_PRIVATE`` keywords.
+
 Variables
 ---------
 
@@ -146,9 +154,10 @@ Variables
 
 * Variable :variable:`CMAKE_<LANG>_COMPILER_TARGET` was introduced
   for use when cross-compiling to specify the target platform in the
-  toolchain file specified by the :variable:`CMAKE_TOOLCHAIN_FILE`
-  variable.  This is used to pass an option such as
-  ``-target <triple>`` to some cross-compiling compiler drivers.
+  :ref:`toolchain file <Cross Compiling Toolchain>` specified by the
+  :variable:`CMAKE_TOOLCHAIN_FILE` variable.
+  This is used to pass an option such as ``--target=<triple>`` to some
+  cross-compiling compiler drivers.
 
 * Variable :variable:`CMAKE_MAP_IMPORTED_CONFIG_<CONFIG>` has been
   introduced to optionally initialize the
@@ -168,11 +177,11 @@ Properties
   Previously this was only possible to achieve by specifying
   such files as the input to a :command:`configure_file` command.
 
-* A new :prop_tgt:`AUTORCC` target property replaces the need to
+* A new :ref:`Qt AUTORCC` feature replaces the need to
   invoke ``qt4_add_resources()`` by allowing ``.qrc`` files to
   be listed as target sources.
 
-* A new :prop_tgt:`AUTOUIC` target property replaces the need to
+* A new :ref:`Qt AUTOUIC` feature replaces the need to
   invoke ``qt4_wrap_ui()``.
 
 * Test properties learned to support
@@ -182,9 +191,14 @@ Properties
   :prop_test:`WORKING_DIRECTORY`.
 
 * A new :prop_test:`SKIP_RETURN_CODE` test property was introduced
-  to tell CTest to treat a particular test return code as if the
-  test were not run.  This is useful for test drivers to report
+  to tell :manual:`ctest(1)` to treat a particular test return code as
+  if the test were not run.  This is useful for test drivers to report
   that certain test requirements were not available.
+
+* New types of :ref:`Compatible Interface Properties` were introduced,
+  namely the :prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` and
+  :prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MIN` for calculating numeric
+  maximum and minimum values respectively.
 
 Modules
 -------
@@ -217,6 +231,16 @@ Modules
 
 * The :module:`UseJava` module ``add_jar`` function learned a new
   ``MANIFEST`` option to pass the ``-m`` option to ``jar``.
+
+* A new ``find_dependency`` macro introduced in the
+  :module:`CMakeFindDependencyMacro` module to find transitive dependencies
+  in a :ref:`package configuration file <cmake-packages(7)>`. Such
+  dependencies are omitted by the listing of the :module:`FeatureSummary`
+  module.
+
+* :ref:`Imported Targets` are now created for all executable targets by
+  the :module:`FindQt4` module. This helps disambiguate when using
+  multiple :manual:`Qt versions <cmake-qt(7)>` in the same buildsystem.
 
 Other
 -----
@@ -320,10 +344,10 @@ Deprecated and Removed Features
   ``$<CONFIG:...>`` to specify per-configuration definitions.
   See policy :policy:`CMP0043`.
 
-* The :prop_tgt:`LOCATION` target property should no longer be used.
-  It does not make sense in multi-configuration generators since the
-  build configuration is not known while configuring the project.
-  It has been superseded by the ``$<TARGET_FILE>`` generator
+* The :prop_tgt:`LOCATION` target property should no longer be read from
+  non-IMPORTED targets.  It does not make sense in multi-configuration
+  generators since the build configuration is not known while configuring
+  the project.  It has been superseded by the ``$<TARGET_FILE>`` generator
   expression.  See policy :policy:`CMP0026`.
 
 * The :prop_tgt:`COMPILE_FLAGS` target property is now documented
@@ -404,3 +428,8 @@ Other Changes
 
 * The ``cmake-mode.el`` major Emacs editing mode has been cleaned
   up and enhanced in several ways.
+
+* Include directories specified in the
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of :ref:`Imported Targets`
+  are treated as ``SYSTEM`` includes by default when handled as
+  :ref:`usage requirements <Include Directories and Usage Requirements>`.
