@@ -233,9 +233,6 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
   cmcmd  \
-  cmCommandArgumentLexer \
-  cmCommandArgumentParser \
-  cmCommandArgumentParserHelper \
   cmDefinitions \
   cmDepends \
   cmDependsC \
