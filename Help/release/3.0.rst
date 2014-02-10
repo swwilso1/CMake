@@ -77,10 +77,6 @@ Generators
 * The :generator:`Ninja` generator learned to use ``ninja`` job pools
   when specified by a new :prop_gbl:`JOB_POOLS` global property.
 
-* New ``$<PLATFORM_ID>`` and ``$<PLATFORM_ID:...>``
-  :manual:`generator expressions <cmake-generator-expressions(7)>`
-  have been added.
-
 Commands
 --------
 
@@ -241,6 +237,26 @@ Modules
 * :ref:`Imported Targets` are now created for all executable targets by
   the :module:`FindQt4` module. This helps disambiguate when using
   multiple :manual:`Qt versions <cmake-qt(7)>` in the same buildsystem.
+
+Generator Expressions
+---------------------
+
+* New ``$<PLATFORM_ID>`` and ``$<PLATFORM_ID:...>``
+  :manual:`generator expressions <cmake-generator-expressions(7)>`
+  have been added.
+
+* The ``$<CONFIG>``
+  :manual:`generator expression <cmake-generator-expressions(7)>` now has
+  a variant which takes no argument.  This is equivalent to the
+  ``$<CONFIGURATION>`` expression.
+
+* New ``$<UPPER_CASE:...>`` and ``$<LOWER_CASE:...>``
+  :manual:`generator expressions <cmake-generator-expressions(7)>`
+  generator expressions have been added.
+
+* A new ``$<MAKE_C_IDENTIFIER:...>``
+  :manual:`generator expression <cmake-generator-expressions(7)>` has
+  been added.
 
 Other
 -----
