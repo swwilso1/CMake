@@ -26,8 +26,10 @@
 
 #define DEVEL_CMAKE_VERSION(maj, min, patch) \
   (maj > CMake_VERSION_MAJOR \
-  || min > CMake_VERSION_MINOR \
-  || patch > CMake_VERSION_PATCH) ? \
+   || (maj == CMake_VERSION_MAJOR && min > CMake_VERSION_MINOR) \
+   || (maj == CMake_VERSION_MAJOR && min == CMake_VERSION_MINOR && \
+       patch > CMake_VERSION_PATCH) \
+  ) ? \
     STRINGIFY(CMake_VERSION_MAJOR) "." STRINGIFY(CMake_VERSION_MINOR) "." \
     STRINGIFY(CMake_VERSION_PATCH) "." STRINGIFY(CMake_VERSION_TWEAK) \
   : #maj "." #min "." #patch
