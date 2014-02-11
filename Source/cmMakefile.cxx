@@ -2532,7 +2532,6 @@ typedef enum
   } t_domain;
 struct t_lookup
   {
-  const char* start;
   t_domain domain;
   std::string lookup;
   };
@@ -2710,36 +2709,34 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         break;
       case '$':
         {
-        bool good = true;
         t_lookup lookup;
         const char* next = in + 1;
+        const char* start = NULL;
         char nextc = *next;
         if(nextc == '{')
           {
           // Looking for a variable.
-          lookup.start = in + 2;
+          start = in + 2;
           lookup.domain = NORMAL;
           }
         else if(nextc == '<')
           {
-          good = false;
           }
         else if(!nextc)
           {
           openstack.top().lookup.append(last, next - last);
           last = next;
-          good = false;
           }
         else if(cmHasLiteralPrefix(next, "ENV{"))
           {
           // Looking for an environment variable.
-          lookup.start = in + 5;
+          start = in + 5;
           lookup.domain = ENVIRONMENT;
           }
         else if(cmHasLiteralPrefix(next, "CACHE{"))
           {
           // Looking for a cache variable.
-          lookup.start = in + 7;
+          start = in + 7;
           lookup.domain = CACHE;
           }
         else
@@ -2752,12 +2749,11 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                    "and $CACHE{} are allowed.";
             error = true;
             }
-          good = false;
           }
-        if(good)
+        if(start)
           {
           openstack.top().lookup.append(last, in - last);
-          last = lookup.start;
+          last = start;
           openstack.push(lookup);
           }
         break;
