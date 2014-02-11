@@ -718,6 +718,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory")
 
+  add_test(CustomCommand.CONFIG  ${CMAKE_CTEST_COMMAND}
+    -C \${CTEST_CONFIGURATION_TYPE}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/CustomCommand/ConfigTest"
+    "${CMake_BINARY_DIR}/Tests/CustomCommand/ConfigTest"
+    --build-two-config
+    ${build_generator_args}
+    --build-project CustomCommand.CONFIG
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommand/bin"
+    --build-options ${build_options}
+    --test-command configtest
+    )
+
    #add_test(SimpleExclude ${CMAKE_CTEST_COMMAND}
    #  --build-and-test
    #  "${CMake_SOURCE_DIR}/Tests/SimpleExclude"
