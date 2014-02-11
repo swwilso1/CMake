@@ -2642,14 +2642,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           t_lookup var = openstack.top();
           openstack.pop();
           std::string lookup = var.lookup;
-          if(lookup.empty())
-            {
-            lookup.append(var.start, in - var.start);
-            }
-          else
-            {
-            lookup.append(last, in - last);
-            }
+          lookup.append(last, in - last);
           const char* value = NULL;
           switch(var.domain)
             {
