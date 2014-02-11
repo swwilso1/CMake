@@ -2532,8 +2532,6 @@ typedef enum
   } t_domain;
 struct t_lookup
   {
-  const char* anchor;
-  const char* start;
   t_domain domain;
   std::string lookup;
   };
@@ -2622,27 +2620,13 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
 
-  std::string work;
   const char* in = atwork.c_str();
   const char* last = in;
   std::stack<t_lookup> openstack;
   std::string estr;
   bool error = false;
   bool done = false;
-
-#define PUSH(args)           \
-  do                         \
-    {                        \
-    if(!openstack.empty())   \
-      {                      \
-      openstack.top()        \
-        .lookup.append args; \
-      }                      \
-    else                     \
-      {                      \
-      work.append args;      \
-      }                      \
-    } while(false)
+  openstack.push(t_lookup());
 
   do
     {
@@ -2651,19 +2635,12 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
     switch(*in)
       {
       case '}':
-        if(!openstack.empty())
+        if(openstack.size() > 1)
           {
           t_lookup var = openstack.top();
           openstack.pop();
           std::string lookup = var.lookup;
-          if(lookup.empty())
-            {
-            lookup.append(var.start, in - var.start);
-            }
-          else
-            {
-            lookup.append(last, in - last);
-            }
+          lookup.append(last, in - last);
           const char* value = NULL;
           switch(var.domain)
             {
@@ -2672,7 +2649,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                 {
                 cmOStringStream ostr;
                 ostr << line;
-                PUSH((ostr.str()));
+                openstack.top().lookup.append(ostr.str());
                 }
               else
                 {
@@ -2725,44 +2702,41 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                 }
               }
             }
-          PUSH((result));
+          openstack.top().lookup.append(result);
           // Start looking from here on out.
           last = in + 1;
           }
         break;
       case '$':
         {
-        bool good = true;
         t_lookup lookup;
-        lookup.anchor = in;
         const char* next = in + 1;
+        const char* start = NULL;
         char nextc = *next;
         if(nextc == '{')
           {
           // Looking for a variable.
-          lookup.start = in + 2;
+          start = in + 2;
           lookup.domain = NORMAL;
           }
         else if(nextc == '<')
           {
-          good = false;
           }
         else if(!nextc)
           {
-          PUSH((last, next - last));
+          openstack.top().lookup.append(last, next - last);
           last = next;
-          good = false;
           }
         else if(cmHasLiteralPrefix(next, "ENV{"))
           {
           // Looking for an environment variable.
-          lookup.start = in + 5;
+          start = in + 5;
           lookup.domain = ENVIRONMENT;
           }
         else if(cmHasLiteralPrefix(next, "CACHE{"))
           {
           // Looking for a cache variable.
-          lookup.start = in + 7;
+          start = in + 7;
           lookup.domain = CACHE;
           }
         else
@@ -2775,12 +2749,11 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                    "and $CACHE{} are allowed.";
             error = true;
             }
-          good = false;
           }
-        if(good)
+        if(start)
           {
-          PUSH((last, in - last));
-          last = lookup.start;
+          openstack.top().lookup.append(last, in - last);
+          last = start;
           openstack.push(lookup);
           }
         break;
@@ -2792,20 +2765,20 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           char nextc = *next;
           if(nextc == 't')
             {
-            PUSH((last, in - last));
-            PUSH(("\t"));
+            openstack.top().lookup.append(last, in - last);
+            openstack.top().lookup.append("\t");
             last = next + 1;
             }
           else if(nextc == 'n')
             {
-            PUSH((last, in - last));
-            PUSH(("\n"));
+            openstack.top().lookup.append(last, in - last);
+            openstack.top().lookup.append("\n");
             last = next + 1;
             }
           else if(nextc == 'r')
             {
-            PUSH((last, in - last));
-            PUSH(("\r"));
+            openstack.top().lookup.append(last, in - last);
+            openstack.top().lookup.append("\r");
             last = next + 1;
             }
           else if(nextc == ';')
@@ -2815,7 +2788,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           else
             {
             // Take what we've found so far, skipping the escape character.
-            PUSH((last, in - last));
+            openstack.top().lookup.append(last, in - last);
             // Start tracking from the next character.
             last = in + 1;
             }
@@ -2844,7 +2817,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   cmake::MessageType mtype = cmake::FATAL_ERROR;
 
   // Check for open variable references yet.
-  if(!openstack.empty())
+  if(openstack.size() != 1)
     {
     // There's an open variable reference waiting.  Use policy CMP0010 to
     // decide whether it is an error.
@@ -2889,12 +2862,10 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   else
     {
     // Append the rest of the unchanged part of the string.
-    PUSH((last));
+    openstack.top().lookup.append(last);
 
-    source = work;
+    source = openstack.top().lookup;
     }
-
-#undef PUSH
 
   return source.c_str();
 }
