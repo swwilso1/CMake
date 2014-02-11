@@ -173,7 +173,7 @@ std::string cmGeneratorExpression::StripEmptyListElements(
       {
       if(skipSemiColons)
         {
-        result.append(last, c);
+        result.append(last, c - last);
         last = c + 1;
         }
       skipSemiColons = true;
