@@ -11,6 +11,8 @@ bypass initial expansion by the CMake language:
   set(sources foo.c)
   add_executable(foo \${sources})
 
+This was undocumented behavior.
+
 The OLD behavior for this policy is to expand such variables when processing
 the target sources.  The NEW behavior for this policy is to issue an error
 if such variables need to be expanded.
