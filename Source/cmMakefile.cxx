@@ -2590,7 +2590,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         }
       else if (!removeEmpty)
         {
-        atwork.append(first, last);
+        atwork.append(first, last - first);
         }
 
       // Continue looking for @VAR@ further along the string.
@@ -2658,11 +2658,11 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           std::string lookup = var.lookup;
           if(lookup.empty())
             {
-            lookup.append(var.start, in);
+            lookup.append(var.start, in - var.start);
             }
           else
             {
-            lookup.append(last, in);
+            lookup.append(last, in - last);
             }
           const char* value = NULL;
           switch(var.domain)
