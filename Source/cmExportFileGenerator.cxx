@@ -179,7 +179,6 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 void cmExportFileGenerator::GenerateRequiredCMakeVersion(std::ostream& os,
                                                     const char *versionString)
 {
-  assert(versionString);
   os << "if(CMAKE_VERSION VERSION_LESS " << versionString << ")\n"
         "  message(FATAL_ERROR \"This file relies on consumers using "
         "CMake " << versionString << " or greater.\")\n"
