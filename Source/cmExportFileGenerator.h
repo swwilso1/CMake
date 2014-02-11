@@ -22,6 +22,10 @@
 #define STRINGIFY(X) STRINGIFY_HELPER(X)
 
 #define DEVEL_CMAKE_VERSION(maj, min, patch) \
+  (CMake_VERSION_ENCODE(maj, min, patch) < \
+   CMake_VERSION_ENCODE(CMake_VERSION_MAJOR, CMake_VERSION_MINOR, \
+                        CMake_VERSION_PATCH) \
+  ) ? 0 : \
   (CMake_VERSION_ENCODE(maj, min, patch) > \
    CMake_VERSION_ENCODE(CMake_VERSION_MAJOR, CMake_VERSION_MINOR, \
                         CMake_VERSION_PATCH) \
