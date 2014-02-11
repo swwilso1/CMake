@@ -228,15 +228,15 @@ Modules
 * The :module:`UseJava` module ``add_jar`` function learned a new
   ``MANIFEST`` option to pass the ``-m`` option to ``jar``.
 
-* A new ``find_dependency`` macro introduced in the
-  :module:`CMakeFindDependencyMacro` module to find transitive dependencies
-  in a :manual:`package configuration file <cmake-packages(7)>`. Such
+* A new :module:`CMakeFindDependencyMacro` module was introduced with
+  a ``find_dependency`` macro to find transitive dependencies in
+  a :manual:`package configuration file <cmake-packages(7)>`.  Such
   dependencies are omitted by the listing of the :module:`FeatureSummary`
   module.
 
-* :ref:`Imported Targets` are now created for all executable targets by
-  the :module:`FindQt4` module. This helps disambiguate when using
-  multiple :manual:`Qt versions <cmake-qt(7)>` in the same buildsystem.
+* The :module:`FindQt4` module learned to create :ref:`Imported Targets`
+  for Qt executables.  This helps disambiguate when using multiple
+  :manual:`Qt versions <cmake-qt(7)>` in the same buildsystem.
 
 Generator Expressions
 ---------------------
