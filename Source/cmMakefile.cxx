@@ -2749,7 +2749,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           }
         else if(!nextc)
           {
-          PUSH((last, next));
+          PUSH((last, next - last));
           last = next;
           good = false;
           }
@@ -2779,7 +2779,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           }
         if(good)
           {
-          PUSH((last, in));
+          PUSH((last, in - last));
           last = lookup.start;
           openstack.push(lookup);
           }
@@ -2792,19 +2792,19 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           char nextc = *next;
           if(nextc == 't')
             {
-            PUSH((last, in));
+            PUSH((last, in - last));
             PUSH(("\t"));
             last = next + 1;
             }
           else if(nextc == 'n')
             {
-            PUSH((last, in));
+            PUSH((last, in - last));
             PUSH(("\n"));
             last = next + 1;
             }
           else if(nextc == 'r')
             {
-            PUSH((last, in));
+            PUSH((last, in - last));
             PUSH(("\r"));
             last = next + 1;
             }
@@ -2815,7 +2815,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           else
             {
             // Take what we've found so far, skipping the escape character.
-            PUSH((last, in));
+            PUSH((last, in - last));
             // Start tracking from the next character.
             last = in + 1;
             }
