@@ -2532,7 +2532,6 @@ typedef enum
   } t_domain;
 struct t_lookup
   {
-  const char* anchor;
   const char* start;
   t_domain domain;
   std::string lookup;
@@ -2713,7 +2712,6 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         {
         bool good = true;
         t_lookup lookup;
-        lookup.anchor = in;
         const char* next = in + 1;
         char nextc = *next;
         if(nextc == '{')
