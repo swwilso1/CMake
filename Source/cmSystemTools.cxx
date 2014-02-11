@@ -1031,7 +1031,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         const char* next = c + 1;
         if(*next == ';')
           {
-          newArg.append(last, c);
+          newArg.append(last, c - last);
           // Skip over the escape character
           last = c = next;
           }
@@ -1050,7 +1050,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         // brackets.
         if(squareNesting == 0)
           {
-          newArg.append(last, c);
+          newArg.append(last, c - last);
           // Skip over the semicolon
           last = c + 1;
           if ( !newArg.empty() || emptyArgs )
