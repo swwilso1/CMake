@@ -1,8 +1,8 @@
+# Literal since 'var' is not defined.
+set(ref "@var@")
 set(right "wrong")
 set(var "\${right}")
-# Expanded here.
-set(ref "@var@")
 
-# No dereference done at all.
+# 'var' is dereferenced, but now 'right'
 string(CONFIGURE "${ref}" output @ONLY)
 message("-->${output}<--")
