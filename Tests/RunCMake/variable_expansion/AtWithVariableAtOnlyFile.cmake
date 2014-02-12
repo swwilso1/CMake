@@ -1,6 +1,5 @@
 set(right "wrong")
 set(var "\${right}")
-set(ref "@var@")
 
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/atfile.txt.in"
