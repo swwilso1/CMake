@@ -151,7 +151,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   //   this->AddFortranFlags(flags);
   //   }
 
-  bool hasLangCached = this->LanguageFlags.count(language);
+  bool hasLangCached = this->LanguageFlags.count(language) != 0;
   std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::string& languageFlags = this->LanguageFlags[language];
   if(!hasLangCached)
