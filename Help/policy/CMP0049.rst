@@ -3,13 +3,13 @@ CMP0049
 
 Do not expand variables in target source entries.
 
-CMake 2.8.12 and lower expanded variables which were escaped in CMake code to
-bypass initial expansion by the CMake language:
+CMake 2.8.12 and lower performed and extra layer of variable expansion
+when evaluating source file names:
 
 .. code-block:: cmake
 
-  set(sources foo.c)
-  add_executable(foo \${sources})
+  set(a_source foo.c)
+  add_executable(foo \${a_source})
 
 This was undocumented behavior.
 
