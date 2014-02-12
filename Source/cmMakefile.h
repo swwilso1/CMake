@@ -971,7 +971,6 @@ private:
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;
-  mutable cmsys::RegularExpression cmNamedCurly;
 
   cmPropertyMap Properties;
 

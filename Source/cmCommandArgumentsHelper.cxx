@@ -304,4 +304,3 @@ void cmCommandArgumentsHelper::AddArgument(cmCommandArgument* arg)
 {
   this->Arguments.push_back(arg);
 }
-

@@ -157,24 +157,17 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 std::string cmGeneratorExpression::StripEmptyListElements(
                                                     const std::string &input)
 {
-  if (input.find(';') == input.npos)
-    {
-    return input;
-    }
   std::string result;
-  result.reserve(input.size());
 
   const char *c = input.c_str();
-  const char *last = c;
   bool skipSemiColons = true;
   for ( ; *c; ++c)
     {
-    if(*c == ';')
+    if(c[0] == ';')
       {
       if(skipSemiColons)
         {
-        result.append(last, c - last);
-        last = c + 1;
+        continue;
         }
       skipSemiColons = true;
       }
@@ -182,8 +175,8 @@ std::string cmGeneratorExpression::StripEmptyListElements(
       {
       skipSemiColons = false;
       }
+    result += *c;
     }
-  result.append(last);
 
   if (!result.empty() && *(result.end() - 1) == ';')
     {

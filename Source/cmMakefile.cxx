@@ -21,6 +21,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmCommandArgumentParserHelper.h"
 #include "cmGeneratorExpression.h"
 #include "cmTest.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -156,7 +157,6 @@ void cmMakefile::Initialize()
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
-  this->cmNamedCurly.compile("^[A-Za-z0-9/_.+-]+{");
 
   // Enter a policy level for this directory.
   this->PushPolicy();
@@ -2524,18 +2524,6 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source) const
   return this->ExpandVariablesInString(source, false, false);
 }
 
-typedef enum
-  {
-  NORMAL,
-  ENVIRONMENT,
-  CACHE
-  } t_domain;
-struct t_lookup
-  {
-  t_domain domain;
-  std::string lookup;
-  };
-
 const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool escapeQuotes,
                                                 bool noEscapes,
@@ -2543,23 +2531,30 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 const char* filename,
                                                 long line,
                                                 bool removeEmpty,
-                                                bool /*replaceAt*/) const
+                                                bool replaceAt) const
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
     return source.c_str();
     }
 
-  std::string atwork = source;
-
-  // Replace @var@ instances.
-  if(atwork.find("@") != atwork.npos)
+  // Special-case the @ONLY mode.
+  if(atOnly)
     {
+    if(!noEscapes || !removeEmpty || !replaceAt)
+      {
+      // This case should never be called.  At-only is for
+      // configure-file/string which always does no escapes.
+      this->IssueMessage(cmake::INTERNAL_ERROR,
+                         "ExpandVariablesInString @ONLY called "
+                         "on something with escapes.");
+      }
+
     // Store an original copy of the input.
-    std::string input = atwork;
+    std::string input = source;
 
     // Start with empty output.
-    atwork = "";
+    source = "";
 
     // Look for one @VAR@ at a time.
     const char* in = input.c_str();
@@ -2570,7 +2565,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       const char* last =  in + this->cmAtVarRegex.end();
 
       // Store the unchanged part of the string now.
-      atwork.append(in, first-in);
+      source.append(in, first-in);
 
       // Lookup the definition of VAR.
       std::string var(first+1, last-first-2);
@@ -2579,16 +2574,12 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         // Store the value in the output escaping as requested.
         if(escapeQuotes)
           {
-          atwork.append(cmSystemTools::EscapeQuotes(val));
+          source.append(cmSystemTools::EscapeQuotes(val));
           }
         else
           {
-          atwork.append(val);
+          source.append(val);
           }
-        }
-      else if (!removeEmpty)
-        {
-        atwork.append(first, last - first);
         }
 
       // Continue looking for @VAR@ further along the string.
@@ -2596,22 +2587,8 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       }
 
     // Append the rest of the unchanged part of the string.
-    atwork.append(in);
-    }
+    source.append(in);
 
-  if(atOnly)
-    {
-    // Sanity check the @ONLY mode.
-    if(!noEscapes || !removeEmpty)
-      {
-      // This case should never be called.  At-only is for
-      // configure-file/string which always does no escapes.
-      this->IssueMessage(cmake::INTERNAL_ERROR,
-                          "ExpandVariablesInString @ONLY called "
-                          "on something with escapes.");
-      }
-
-    source = atwork;
     return source.c_str();
     }
 
@@ -2620,253 +2597,69 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
 
-  const char* in = atwork.c_str();
-  const char* last = in;
-  std::stack<t_lookup> openstack;
-  std::string estr;
-  bool error = false;
-  bool done = false;
-  openstack.push(t_lookup());
-
-  do
+  cmCommandArgumentParserHelper parser;
+  parser.SetMakefile(this);
+  parser.SetLineFile(line, filename);
+  parser.SetEscapeQuotes(escapeQuotes);
+  parser.SetNoEscapeMode(noEscapes);
+  parser.SetReplaceAtSyntax(replaceAt);
+  parser.SetRemoveEmpty(removeEmpty);
+  int res = parser.ParseString(source.c_str(), 0);
+  const char* emsg = parser.GetError();
+  if ( res && !emsg[0] )
     {
-    // Try and skip some more all at once while we're here.
-    in += strcspn(in, "}$\\\n");
-    switch(*in)
-      {
-      case '}':
-        if(openstack.size() > 1)
-          {
-          t_lookup var = openstack.top();
-          openstack.pop();
-          std::string lookup = var.lookup;
-          lookup.append(last, in - last);
-          const char* value = NULL;
-          switch(var.domain)
-            {
-            case NORMAL:
-              if(filename && lookup == "CMAKE_CURRENT_LIST_LINE")
-                {
-                cmOStringStream ostr;
-                ostr << line;
-                openstack.top().lookup.append(ostr.str());
-                }
-              else
-                {
-                value = this->GetDefinition(lookup.c_str());
-                }
-              break;
-            case ENVIRONMENT:
-              value = cmSystemTools::GetEnv(lookup.c_str());
-              break;
-            case CACHE:
-              value = this->GetCacheManager()->GetCacheValue(lookup.c_str());
-              break;
-            }
-          // Get the string we're meant to append to.
-          std::string result;
-          if(value)
-            {
-            if(escapeQuotes)
-              {
-              result = cmSystemTools::EscapeQuotes(value);
-              }
-            else
-              {
-              result = value;
-              }
-            }
-          else if(!removeEmpty)
-            {
-            // check to see if we need to print a warning
-            // if strict mode is on and the variable has
-            // not been "cleared"/initialized with a set(foo ) call
-            if(this->GetCMakeInstance()->GetWarnUninitialized() &&
-               !this->VariableInitialized(lookup.c_str()))
-              {
-              if (this->CheckSystemVars ||
-                  cmSystemTools::IsSubDirectory(filename,
-                                                this->GetHomeDirectory()) ||
-                  cmSystemTools::IsSubDirectory(filename,
-                                             this->GetHomeOutputDirectory()))
-                {
-                cmOStringStream msg;
-                cmListFileBacktrace bt;
-                cmListFileContext lfc;
-                lfc.FilePath = filename;
-                lfc.Line = line;
-                bt.push_back(lfc);
-                msg << "uninitialized variable \'" << lookup << "\'";
-                this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                       msg.str().c_str(), bt);
-                }
-              }
-            }
-          openstack.top().lookup.append(result);
-          // Start looking from here on out.
-          last = in + 1;
-          }
-        break;
-      case '$':
-        {
-        t_lookup lookup;
-        const char* next = in + 1;
-        const char* start = NULL;
-        char nextc = *next;
-        if(nextc == '{')
-          {
-          // Looking for a variable.
-          start = in + 2;
-          lookup.domain = NORMAL;
-          }
-        else if(nextc == '<')
-          {
-          }
-        else if(!nextc)
-          {
-          openstack.top().lookup.append(last, next - last);
-          last = next;
-          }
-        else if(cmHasLiteralPrefix(next, "ENV{"))
-          {
-          // Looking for an environment variable.
-          start = in + 5;
-          lookup.domain = ENVIRONMENT;
-          }
-        else if(cmHasLiteralPrefix(next, "CACHE{"))
-          {
-          // Looking for a cache variable.
-          start = in + 7;
-          lookup.domain = CACHE;
-          }
-        else
-          {
-          if(this->cmNamedCurly.find(next))
-            {
-            estr = "Syntax $"
-                 + std::string(next, this->cmNamedCurly.end())
-                 + "{} is not supported.  Only ${}, $ENV{}, "
-                   "and $CACHE{} are allowed.";
-            error = true;
-            }
-          }
-        if(start)
-          {
-          openstack.top().lookup.append(last, in - last);
-          last = start;
-          openstack.push(lookup);
-          }
-        break;
-        }
-      case '\\':
-        if(!noEscapes)
-          {
-          const char* next = in + 1;
-          char nextc = *next;
-          if(nextc == 't')
-            {
-            openstack.top().lookup.append(last, in - last);
-            openstack.top().lookup.append("\t");
-            last = next + 1;
-            }
-          else if(nextc == 'n')
-            {
-            openstack.top().lookup.append(last, in - last);
-            openstack.top().lookup.append("\n");
-            last = next + 1;
-            }
-          else if(nextc == 'r')
-            {
-            openstack.top().lookup.append(last, in - last);
-            openstack.top().lookup.append("\r");
-            last = next + 1;
-            }
-          else if(nextc == ';')
-            {
-            // Do nothing?
-            }
-          else
-            {
-            // Take what we've found so far, skipping the escape character.
-            openstack.top().lookup.append(last, in - last);
-            // Start tracking from the next character.
-            last = in + 1;
-            }
-          // Skip the next character since it was escaped, but don't read past
-          // the end of the string.
-          if(*last)
-            {
-            ++in;
-            }
-          }
-        break;
-      case '\n':
-        // Onto the next line.
-        ++line;
-        break;
-      case '\0':
-        done = true;
-        break;
-      default:
-        break;
-      }
-    // Look at the next character.
-    } while(!error && !done && *++in);
-
-  // Errors are fatal by default.
-  cmake::MessageType mtype = cmake::FATAL_ERROR;
-
-  // Check for open variable references yet.
-  if(openstack.size() != 1)
-    {
-    // There's an open variable reference waiting.  Use policy CMP0010 to
-    // decide whether it is an error.
-    switch(this->GetPolicyStatus(cmPolicies::CMP0010))
-      {
-      case cmPolicies::WARN:
-        estr += "\n" + this->GetPolicies()
-                       ->GetPolicyWarning(cmPolicies::CMP0010);
-      case cmPolicies::OLD:
-        // OLD behavior is to just warn and continue.
-        mtype = cmake::AUTHOR_WARNING;
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        estr += "\n" + this->GetPolicies()
-                       ->GetRequiredPolicyError(cmPolicies::CMP0010);
-      case cmPolicies::NEW:
-        // NEW behavior is to report the error.
-        cmSystemTools::SetFatalErrorOccured();
-        break;
-      }
-    error = true;
+    source = parser.GetResult();
     }
-
-  if(error)
+  else
     {
-    cmOStringStream emsg;
-    emsg << "Syntax error in cmake code ";
-    if(filename)
+    // Construct the main error message.
+    cmOStringStream error;
+    error << "Syntax error in cmake code ";
+    if(filename && line > 0)
       {
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      emsg << "at\n"
+      error << "at\n"
             << "  " << filename << ":" << line << "\n";
       }
-    emsg << "when parsing string\n"
-         << "  " << source << "\n";
-    emsg << estr;
-    this->IssueMessage(mtype, emsg.str());
-    }
-  else
-    {
-    // Append the rest of the unchanged part of the string.
-    openstack.top().lookup.append(last);
+    error << "when parsing string\n"
+          << "  " << source.c_str() << "\n";
+    error << emsg;
 
-    source = openstack.top().lookup;
+    // If the parser failed ("res" is false) then this is a real
+    // argument parsing error, so the policy applies.  Otherwise the
+    // parser reported an error message without failing because the
+    // helper implementation is unhappy, which has always reported an
+    // error.
+    cmake::MessageType mtype = cmake::FATAL_ERROR;
+    if(!res)
+      {
+      // This is a real argument parsing error.  Use policy CMP0010 to
+      // decide whether it is an error.
+      switch(this->GetPolicyStatus(cmPolicies::CMP0010))
+        {
+        case cmPolicies::WARN:
+          error << "\n"
+                << (this->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0010));
+        case cmPolicies::OLD:
+          // OLD behavior is to just warn and continue.
+          mtype = cmake::AUTHOR_WARNING;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          error << "\n"
+                << (this->GetPolicies()
+                    ->GetRequiredPolicyError(cmPolicies::CMP0010));
+        case cmPolicies::NEW:
+          // NEW behavior is to report the error.
+          cmSystemTools::SetFatalErrorOccured();
+          break;
+        }
+      }
+    this->IssueMessage(mtype, error.str());
     }
-
   return source.c_str();
 }
 
