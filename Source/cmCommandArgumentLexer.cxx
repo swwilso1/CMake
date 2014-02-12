@@ -2074,3 +2074,4 @@ void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
     BEGIN(ESCAPES);
     }
 }
+

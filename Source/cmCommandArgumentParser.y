@@ -243,3 +243,4 @@ void cmCommandArgumentError(yyscan_t yyscanner, const char* message)
 {
   yyGetParser->Error(message);
 }
+
