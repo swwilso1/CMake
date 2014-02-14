@@ -140,17 +140,10 @@ std::string
 cmNinjaNormalTargetGenerator
 ::LanguageLinkerRule() const
 {
-  std::string var = std::string(this->TargetLinkLanguage)
+  return std::string(this->TargetLinkLanguage)
     + "_"
     + cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
     + "_LINKER";
-
-  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
-    {
-    var += "_IPO";
-    }
-
-  return var;
 }
 
 void
@@ -159,7 +152,6 @@ cmNinjaNormalTargetGenerator
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
-
   if (useResponseFile)
     ruleName += "_RSP_FILE";
 
@@ -328,7 +320,6 @@ cmNinjaNormalTargetGenerator
       std::string linkCmdVar = "CMAKE_";
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_CREATE_STATIC_LIBRARY";
-      linkCmdVar = this->GetFeatureSpecificLinkRuleVariable(linkCmdVar);
       if (const char *linkCmd =
             this->GetMakefile()->GetDefinition(linkCmdVar.c_str()))
         {
@@ -349,7 +340,6 @@ cmNinjaNormalTargetGenerator
       std::string linkCmdVar = "CMAKE_";
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_CREATE";
-      linkCmdVar = this->GetFeatureSpecificLinkRuleVariable(linkCmdVar);
       const char *linkCmd =
         this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
@@ -358,7 +348,6 @@ cmNinjaNormalTargetGenerator
       std::string linkCmdVar = "CMAKE_";
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_FINISH";
-      linkCmdVar = this->GetFeatureSpecificLinkRuleVariable(linkCmdVar);
       const char *linkCmd =
         this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
@@ -489,9 +478,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string flags = (targetType == cmTarget::EXECUTABLE
                                ? vars["FLAGS"]
                                : vars["ARCH_FLAGS"]);
-
-  this->AddFeatureFlags(flags, this->TargetLinkLanguage);
-
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
                              this->GetGeneratorTarget(),
                              this->TargetLinkLanguage,
