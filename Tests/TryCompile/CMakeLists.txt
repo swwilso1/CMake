@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project(TryCompile OBJC C CXX)
+project(TryCompile OBJC OBJCXX C CXX)
 
 macro(TEST_ASSERT value msg)
   if (NOT ${value})
@@ -288,11 +288,13 @@ endif()
 
 #########################################################################
 #
-# Test that the CHECK_OBJCC_SOURCE_COMPILES, CHECK_OBJC_SOURCE_RUNS
-# macros work.
+# Test that the CHECK_OBJCC_SOURCE_COMPILES, CHECK_OBJCXX_SOURCE_COMPILES
+# CHECK_OBJC_SOURCE_RUNS and CHECK_OBJCXX_SOURCE_RUNS macros work
 
 include(CheckOBJCSourceCompiles)
+include(CheckOBJCXXSourceCompiles)
 include(CheckOBJCSourceRuns)
+include(CheckOBJCXXSourceRuns)
 
 CHECK_OBJC_SOURCE_COMPILES("I don't build in Objective-C" OBJC_BUILD_SHOULD_FAIL)
 CHECK_OBJC_SOURCE_COMPILES("int main() { return 0; }" SIMPLE_OBJC_BUILD_SHOULD_WORK)
@@ -313,6 +315,25 @@ TEST_FAIL(SIMPLE_OBJC_RUN_SHOULD_FAIL "CHECK_OBJC_SOURC_RUNS() succeeds, but sho
 TEST_ASSERT(SIMPLE_OBJC_RUN_SHOULD_WORK "CHECK_OBJC_SOURCE_RUNS() failed, but should have succeeded")
 TEST_FAIL(OBJC_RUN_SHOULD_FAIL "CHECK_OBJC_SOURCE_RUNS() succeeds, but should have failed")
 TEST_ASSERT(OBJC_RUN_SHOULD_WORK "CHECK_OBJC_SOURCE_RUNS() failed, but should have succeeded")
+
+
+CHECK_OBJCXX_SOURCE_COMPILES("I don't build in Objective-C++" OBJCXX_BUILD_SHOULD_FAIL)
+CHECK_OBJCXX_SOURCE_COMPILES("int main() { return 0; }" SIMPLE_OBJCXX_BUILD_SHOULD_WORK)
+
+TEST_FAIL(OBJCXX_BUILD_SHOULD_FAIL "CHECK_OBJCXX_SOURCE_COMPILES() succeeded, but should have failed")
+TEST_ASSERT(SIMPLE_OBJCXX_BUILD_SHOULD_WORK "CHECK_OBJCXX_SOURCE_COMPILES() failed, but should have succeeded")
+
+CHECK_OBJCXX_SOURCE_COMPILES("#import <Foundation/Foundation.h>\n#include <iostream>\nint main()\n{\nNSObject *foo;\nstd::cout << \"Hello\" << std::endl;\nreturn 0;\n}\n" OBJCXX_BUILD_SHOULD_WORK)
+CHECK_OBJCXX_SOURCE_RUNS("int main() { return 2; }" SIMPLE_OBJCXX_RUN_SHOULD_FAIL)
+CHECK_OBJCXX_SOURCE_RUNS("int main() { return 0; }" SIMPLE_OBJCXX_RUN_SHOULD_WORK)
+CHECK_OBJCXX_SOURCE_RUNS("#import <Foundation/Foundation.h>\n#include <vector>\nint main()\n{\nNSObject *foo;\nstd::vector<int> bar;\nreturn 2;\n}\n" OBJCXX_RUN_SHOULD_FAIL)
+CHECK_OBJCXX_SOURCE_RUNS("#import <Foundation/Foundation.h>\n#include <vector>\nint main()\n{\nNSObject *foo;\nstd::vector<int> bar;\nreturn 0;\n}\n" OBJCXX_RUN_SHOULD_WORK)
+
+TEST_ASSERT(OBJCXX_BUILD_SHOULD_WORK "CHECK_OBJCXX_SOURCE_COMPILES() failed, but should have succeeded")
+TEST_FAIL(SIMPLE_OBJCXX_RUN_SHOULD_FAIL "CHECK_OBJCXX_SOURC_RUNS() succeeds, but should have failed")
+TEST_ASSERT(SIMPLE_OBJCXX_RUN_SHOULD_WORK "CHECK_OBJCXX_SOURCE_RUNS() failed, but should have succeeded")
+TEST_FAIL(OBJCXX_RUN_SHOULD_FAIL "CHECK_OBJCXX_SOURCE_RUNS() succeeds, but should have failed")
+TEST_ASSERT(OBJCXX_RUN_SHOULD_WORK "CHECK_OBJCXX_SOURCE_RUNS() failed, but should have succeeded")
 
 #######################################################################
 #
