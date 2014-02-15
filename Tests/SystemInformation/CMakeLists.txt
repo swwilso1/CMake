@@ -131,7 +131,7 @@ PropertyType getTypedProperty(const char* prop)
 
 int foo()
 {
-  getTypedProperty<int>(0);
+  return getTypedProperty<int>(0);
 }
 ")
 
@@ -147,7 +147,7 @@ PropertyType getTypedProperty(const char* prop,
 
 int foo()
 {
-  getTypedProperty<int>(0);
+  return getTypedProperty<int>(0);
 }
 ")
 
