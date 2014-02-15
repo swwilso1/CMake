@@ -820,6 +820,7 @@ static const char* ruleReplaceVars[] =
   "CMAKE_RANLIB",
   "CMAKE_LINKER",
   "CMAKE_CL_SHOWINCLUDES_PREFIX",
+  "CMAKE_LIBTOOL",
   0
 };
 
@@ -1984,7 +1985,8 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar);
-    if(!archs.empty() && !lang.empty() && (lang[0] =='C' || lang[0] == 'F'))
+    if(!archs.empty() && !lang.empty() && (lang[0] =='C' || lang[0] == 'F' ||
+      lang[0] == 'O'))
       {
       for(std::vector<std::string>::iterator i = archs.begin();
           i != archs.end(); ++i)

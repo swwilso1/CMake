@@ -489,6 +489,28 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
 } cxxCompilerIdNode;
 
 //----------------------------------------------------------------------------
+static const struct OBJCCompilerIdNode : public CompilerIdNode
+{
+  OBJCCompilerIdNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<OBJC_COMPILER_ID> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      return std::string();
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "OBJC");
+  }
+} objcCompilerIdNode;
+
+//----------------------------------------------------------------------------
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
@@ -572,6 +594,27 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
   }
 } cxxCompilerVersionNode;
 
+//----------------------------------------------------------------------------
+static const struct OBJCCompilerVersionNode : public CompilerVersionNode
+{
+  OBJCCompilerVersionNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<OBJC_COMPILER_VERSION> may only be used with targets.  "
+          "It may not be used with add_custom_command.");
+      return std::string();
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "OBJC");
+  }
+} objcCompilerVersionNode;
 
 //----------------------------------------------------------------------------
 struct PlatformIdNode : public cmGeneratorExpressionNode
@@ -1641,11 +1684,13 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     nodeMap["NOT"] = &notNode;
     nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
     nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
+    nodeMap["OBJC_COMPILER_ID"] = &objcCompilerIdNode;
     nodeMap["VERSION_GREATER"] = &versionGreaterNode;
     nodeMap["VERSION_LESS"] = &versionLessNode;
     nodeMap["VERSION_EQUAL"] = &versionEqualNode;
     nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
     nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
+    nodeMap["OBJC_COMPILER_VERSION"] = &objcCompilerVersionNode;
     nodeMap["PLATFORM_ID"] = &platformIdNode;
     nodeMap["CONFIGURATION"] = &configurationNode;
     nodeMap["CONFIG"] = &configurationTestNode;
@@ -1683,7 +1728,6 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return 0;
     }
   return i->second;
-
 }
 
 //----------------------------------------------------------------------------
