@@ -1,7 +1,7 @@
 enable_language
 ---------------
 
-Enable a language (CXX/C/Fortran/etc)
+Enable a language (CXX/C/OBJC/Fortran/etc)
 
 ::
 
@@ -10,7 +10,7 @@ Enable a language (CXX/C/Fortran/etc)
 This command enables support for the named language in CMake.  This is
 the same as the project command but does not create any of the extra
 variables that are created by the project command.  Example languages
-are CXX, C, Fortran.
+are CXX, C, OBJC, Fortran.
 
 This command must be called in file scope, not in a function call.
 Furthermore, it must be called in the highest directory common to all
