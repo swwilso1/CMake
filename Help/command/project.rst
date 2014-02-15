@@ -42,7 +42,7 @@ Variables corresponding to unspecified versions are set to the empty string
 
 Optionally you can specify which languages your project supports.
 Example languages are ``C``, ``CXX`` (i.e.  C++), ``Fortran``,
-``OBJC`` (i.e. Objective-C), etc.
+``OBJC`` (i.e. Objective-C), ``OBJCXX`` etc.
 By default ``C`` and ``CXX`` are enabled if no language options are
 given.  Specify language ``NONE``, or use the ``LANGUAGES`` keyword
 and list no languages, to skip enabling any languages.

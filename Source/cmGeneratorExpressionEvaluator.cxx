@@ -511,6 +511,28 @@ static const struct OBJCCompilerIdNode : public CompilerIdNode
 } objcCompilerIdNode;
 
 //----------------------------------------------------------------------------
+static const struct OBJCXXCompilerIdNode : public CompilerIdNode
+{
+  OBJCXXCompilerIdNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<OBJCXX_COMPILER_ID> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      return std::string();
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "OBJCXX");
+  }
+} objcxxCompilerIdNode;
+
+//----------------------------------------------------------------------------
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
@@ -615,6 +637,28 @@ static const struct OBJCCompilerVersionNode : public CompilerVersionNode
                                       dagChecker, "OBJC");
   }
 } objcCompilerVersionNode;
+
+//----------------------------------------------------------------------------
+static const struct OBJCXXCompilerVersionNode : public CompilerVersionNode
+{
+  OBJCXXCompilerVersionNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<OBJCXX_COMPILER_VERSION> may only be used with targets.  "
+          "It may not be used with add_custom_command.");
+      return std::string();
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "OBJCXX");
+  }
+} objcxxCompilerVersionNode;
 
 //----------------------------------------------------------------------------
 struct PlatformIdNode : public cmGeneratorExpressionNode
@@ -1685,12 +1729,14 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
     nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
     nodeMap["OBJC_COMPILER_ID"] = &objcCompilerIdNode;
+    nodeMap["OBJCXX_COMPILER_ID"] = &objcxxCompilerIdNode;
     nodeMap["VERSION_GREATER"] = &versionGreaterNode;
     nodeMap["VERSION_LESS"] = &versionLessNode;
     nodeMap["VERSION_EQUAL"] = &versionEqualNode;
     nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
     nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
     nodeMap["OBJC_COMPILER_VERSION"] = &objcCompilerVersionNode;
+    nodeMap["OBJCXX_COMPILER_VERSION"] = &objcxxCompilerVersionNode;
     nodeMap["PLATFORM_ID"] = &platformIdNode;
     nodeMap["CONFIGURATION"] = &configurationNode;
     nodeMap["CONFIG"] = &configurationTestNode;

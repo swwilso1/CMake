@@ -70,6 +70,8 @@ otherwise expands to nothing.
   ``1`` if the CMake-id of the CXX compiler matches ``comp``, otherwise ``0``.
 ``$<OBJC_COMPILER_ID:comp>``
   ``1`` if the CMake-id of the OBJC compiler matches ``comp``, otherwise ``0``.
+``$<OBJCXX_COMPILER_ID:comp>``
+  ``1`` if the CMake-id of the OBJCXX compiler matches ``comp``, otherwise ``0``.
 ``$<VERSION_GREATER:v1,v2>``
   ``1`` if ``v1`` is a version greater than ``v2``, else ``0``.
 ``$<VERSION_LESS:v1,v2>``
@@ -121,6 +123,8 @@ than 4.2.0.
   The version of the CXX compiler used.
 ``$<OBJC_COMPILER_VERSION>``
   The version of the OBJC compiler used.
+``$<OBJCXX_COMPILER_VERSION>``
+  The version of the OBJCXX compiler used.
 ``$<TARGET_FILE:tgt>``
   Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a target.
 ``$<TARGET_FILE_NAME:tgt>``

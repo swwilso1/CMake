@@ -32,6 +32,9 @@ All Modules
    /module/CheckOBJCCompilerFlag
    /module/CheckOBJCSourceCompiles
    /module/CheckOBJCSourceRuns
+   /module/CheckOBJCXXCompilerFlag
+   /module/CheckOBJCXXSourceCompiles
+   /module/CheckOBJCXXSourceRuns
    /module/CheckPrototypeDefinition
    /module/CheckStructHasMember
    /module/CheckSymbolExists
