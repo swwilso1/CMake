@@ -151,19 +151,12 @@ int foo()
 }
 ")
 
-test_compiler_capability(HAVE_WORKING_SIZE_T "
+test_compiler_capability(HAVE_STD_SIZE_T "
 #include <cstddef>
 
-template<long>
-void bar();
-template<>
-void bar<sizeof(std::size_t)>()
-{
-
-}
 void foo()
 {
-  bar<sizeof(size_t)>();
+  std::size_t sz = sizeof(int);
 }
 ")
 
