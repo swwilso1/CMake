@@ -95,7 +95,7 @@ int main(int argc, char const* const* argv)
     hcm.AddCMakePaths();
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);
-    doc.SetName("ccmake");
+    doc.SetName("WRI ccmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Generators",generators);

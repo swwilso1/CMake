@@ -218,7 +218,7 @@ int do_cmake(int ac, char const* const* av)
 
     hcm.GetGeneratorDocumentation(generators);
 
-    doc.SetName("cmake");
+    doc.SetName("WRI cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.AppendSection("Generators",generators);

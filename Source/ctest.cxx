@@ -165,7 +165,7 @@ int main (int argc, char const* const* argv)
       ch->CreateCMake();
 
       doc.SetShowGenerators(false);
-      doc.SetName("ctest");
+      doc.SetName("WRI ctest");
       doc.SetSection("Name",cmDocumentationName);
       doc.SetSection("Usage",cmDocumentationUsage);
       doc.PrependSection("Options",cmDocumentationOptions);

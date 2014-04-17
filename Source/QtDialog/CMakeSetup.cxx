@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);
-    doc.SetName("cmake");
+    doc.SetName("WRI cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.AppendSection("Generators",generators);

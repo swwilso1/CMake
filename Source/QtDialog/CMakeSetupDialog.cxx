@@ -60,7 +60,7 @@ void QCMakeThread::run()
 CMakeSetupDialog::CMakeSetupDialog()
   : ExitAfterGenerate(true), CacheModified(false), ConfigureNeeded(true), CurrentState(Interrupting)
 {
-  QString title = QString(tr("CMake %1"));
+  QString title = QString(tr("WRI CMake %1"));
   title = title.arg(cmVersion::GetCMakeVersion());
   this->setWindowTitle(title);
 
@@ -629,7 +629,7 @@ void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
 
 void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
 {
-  QString title = QString(tr("CMake %1 - %2"));
+  QString title = QString(tr("WRI CMake %1 - %2"));
   title = title.arg(cmVersion::GetCMakeVersion());
   title = title.arg(dir);
   this->setWindowTitle(title);
@@ -811,7 +811,8 @@ void CMakeSetupDialog::doDeleteCache()
 void CMakeSetupDialog::doAbout()
 {
   QString msg = tr(
-    "CMake %1 (cmake.org).\n"
+    "WRI CMake %1 (cmake.org).\n"
+    "WRI CMake suite maintained by Steve Wilson. (stevew@wolfram.com).\n"
     "CMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
     "Distributed under terms of the BSD 3-Clause License.\n"
     "\n"

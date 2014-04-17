@@ -101,8 +101,10 @@ bool cmDocumentation::PrintVersion(std::ostream& os)
   os <<
     this->GetNameString() <<
     " version " << cmVersion::GetCMakeVersion() << "\n"
+    "WRI CMake developed and maintained by Steve Wilson. (stevew@wolfram.com)."
     "\n"
     "CMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
+    "\n"
     ;
   return true;
 }
@@ -874,7 +876,7 @@ const char* cmDocumentation::GetNameString() const
     }
   else
     {
-    return "CMake";
+    return "WRI CMake";
     }
 }
 

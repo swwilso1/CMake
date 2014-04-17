@@ -452,7 +452,7 @@ int main (int argc, char const* const* argv)
     {
     // Construct and print requested documentation.
 
-    doc.SetName("cpack");
+    doc.SetName("WRI cpack");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.PrependSection("Options",cmDocumentationOptions);
