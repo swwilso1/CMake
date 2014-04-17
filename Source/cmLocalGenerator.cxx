@@ -1431,6 +1431,14 @@ void cmLocalGenerator::AddCompileOptions(
       {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       }
+    {
+    std::string flagsPropName = "COMPILE_FLAGS_";
+    flagsPropName += cmSystemTools::UpperCase(config);
+    if(const char *targetFlags = target->GetProperty(flagsPropName))
+      {
+      cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
+      }
+    }
     target->GetCompileOptions(opts, config);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
@@ -1451,6 +1459,14 @@ void cmLocalGenerator::AddCompileOptions(
       // COMPILE_FLAGS are not escaped for historical reasons.
       this->AppendFlags(flags, targetFlags);
       }
+    {
+    std::string flagsPropName = "COMPILE_FLAGS_";
+    flagsPropName += cmSystemTools::UpperCase(config);
+    if(const char *targetFlags = target->GetProperty(flagsPropName))
+      {
+      this->AppendFlags(flags, targetFlags);
+      }
+    }
     std::vector<std::string> opts;
     target->GetCompileOptions(opts, config);
     for(std::vector<std::string>::const_iterator i = opts.begin();
