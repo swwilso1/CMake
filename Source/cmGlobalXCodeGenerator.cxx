@@ -1615,8 +1615,13 @@ void  cmGlobalXCodeGenerator
           ccg.GetDepends().begin();
           d != ccg.GetDepends().end(); ++d)
         {
-        makefileStream << "\\\n" <<
-          this->ConvertToRelativeForMake(dep.c_str());
+        std::string dep;
+        if(this->CurrentLocalGenerator
+           ->GetRealDependency(d->c_str(), configName, dep))
+          {
+          makefileStream << "\\\n" <<
+            this->ConvertToRelativeForMake(dep.c_str());
+          }
         }
       }
     if(cc.HasCommandLines(configName))

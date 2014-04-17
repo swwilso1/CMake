@@ -179,7 +179,7 @@ public:
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& depends,
-    const char* main_dependency,
+    const std::string& main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     const std::string& configName = "",

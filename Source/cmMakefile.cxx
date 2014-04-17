@@ -1029,7 +1029,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = 0;
-  if(main_dependency && main_dependency[0])
+  if(! main_dependency.empty())
     {
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
@@ -1099,7 +1099,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
   // Construct a complete list of dependencies.
   std::vector<std::string> depends2(depends);
-  if(main_dependency && main_dependency[0])
+  if(! main_dependency.empty())
     {
     depends2.push_back(main_dependency);
     }
@@ -1182,7 +1182,7 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
 {
   // Translate the old-style signature to one of the new-style
   // signatures.
-  if(strcmp(source, target) == 0)
+  if(source == target)
     {
     // In the old-style signature if the source and target were the
     // same then it added a post-build rule to the target.  Preserve
@@ -1230,12 +1230,13 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
       {
       if (this->Targets.find(target) != this->Targets.end())
         {
-        this->Targets[target].AddSourceFile(sf);
+        this->Targets[target].AddSource(sf->GetFullPath());
         }
       else
         {
         cmSystemTools::Error("Attempt to add a custom rule to a target "
-                             "that does not exist yet for target ", target);
+                             "that does not exist yet for target ",
+                             target.c_str());
         return;
         }
       }
