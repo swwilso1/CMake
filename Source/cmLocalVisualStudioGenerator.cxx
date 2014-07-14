@@ -151,14 +151,14 @@ cmLocalVisualStudioGenerator
     }
 
   // Write each command on a single line.
-  for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
+  for(unsigned int c = 0; c < ccg.GetNumberOfCommands(configName); ++c)
     {
     // Start a new line.
     script += newline;
     newline = newline_text;
 
     // Add this command line.
-    std::string cmd = ccg.GetCommand(c);
+    std::string cmd = ccg.GetCommand(c, configName);
 
     // Use "call " before any invocations of .bat or .cmd files
     // invoked as custom commands.
@@ -174,7 +174,7 @@ cmLocalVisualStudioGenerator
       }
 
     script += this->Convert(cmd.c_str(), relativeRoot, SHELL);
-    ccg.AppendArguments(c, script);
+    ccg.AppendArguments(c, script, configName);
 
     // After each custom command, check for an error result.
     // If there was an error, jump to the VCReportError label,
