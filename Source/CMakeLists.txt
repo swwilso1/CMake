@@ -325,6 +325,7 @@ foreach(command_file
     cmSubdirDependsCommand
     cmTargetCompileDefinitionsCommand
     cmTargetCompileOptionsCommand
+    cmTargetLinkOptionsCommand
     cmTargetIncludeDirectoriesCommand
     cmUseMangledMesaCommand
     cmUtilitySourceCommand
