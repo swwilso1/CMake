@@ -29,6 +29,12 @@ All Modules
    /module/CheckIncludeFiles
    /module/CheckLanguage
    /module/CheckLibraryExists
+   /module/CheckOBJCCompilerFlag
+   /module/CheckOBJCSourceCompiles
+   /module/CheckOBJCSourceRuns
+   /module/CheckOBJCXXCompilerFlag
+   /module/CheckOBJCXXSourceCompiles
+   /module/CheckOBJCXXSourceRuns
    /module/CheckPrototypeDefinition
    /module/CheckStructHasMember
    /module/CheckSymbolExists
