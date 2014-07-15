@@ -2255,6 +2255,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   ADD_TEST_MACRO(CMakeCommands.target_link_options target_link_options)
   ADD_TEST_MACRO(CMakeCommands.add_link_options add_link_options)
 
+  set_property(TEST CMakeCommands.add_link_options PROPERTY WILL_FAIL ON)
+
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake"
