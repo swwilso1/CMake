@@ -353,6 +353,7 @@ foreach(command_file
     cmTargetCompileDefinitionsCommand
     cmTargetCompileFeaturesCommand
     cmTargetCompileOptionsCommand
+    cmTargetLinkOptionsCommand
     cmTargetIncludeDirectoriesCommand
     cmTargetSourcesCommand
     cmUseMangledMesaCommand
