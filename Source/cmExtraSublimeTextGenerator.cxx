@@ -411,7 +411,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   {
   std::string flagPropName = "COMPILE_FLAGS_";
   flagPropName += cmSystemTools::UpperCase(config);
-  lg->AppendFlags(flags, source->GetProperty(flagPropName));
+  lg->AppendFlags(flags, source->GetProperty(flagPropName.c_str()));
   }
 
   // TODO: Handle Apple frameworks.

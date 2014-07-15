@@ -1427,7 +1427,7 @@ void cmLocalGenerator::AddCompileOptions(
     {
     std::string flagsPropName = "COMPILE_FLAGS_";
     flagsPropName += cmSystemTools::UpperCase(config);
-    if(const char *targetFlags = target->GetProperty(flagsPropName))
+    if(const char *targetFlags = target->GetProperty(flagsPropName.c_str()))
       {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       }
@@ -1455,7 +1455,7 @@ void cmLocalGenerator::AddCompileOptions(
     {
     std::string flagsPropName = "COMPILE_FLAGS_";
     flagsPropName += cmSystemTools::UpperCase(config);
-    if(const char *targetFlags = target->GetProperty(flagsPropName))
+    if(const char *targetFlags = target->GetProperty(flagsPropName.c_str()))
       {
       this->AppendFlags(flags, targetFlags);
       }
