@@ -51,12 +51,12 @@ std::string cmTargetLinkOptionsCommand
 }
 
 //----------------------------------------------------------------------------
-void cmTargetLinkOptionsCommand
+bool cmTargetLinkOptionsCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                                    bool, bool)
 {
-  cmListFileBacktrace lfbt;
-  this->Makefile->GetBacktrace(lfbt);
+  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
   cmValueWithOrigin entry(this->Join(content), lfbt);
   tgt->InsertLinkOption(entry);
+  return true;
 }
