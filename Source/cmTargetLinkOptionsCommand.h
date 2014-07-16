@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "target_link_options";}
+  virtual const char * GetName() const { return "target_link_options";}
 
   cmTypeMacro(cmTargetLinkOptionsCommand, cmTargetPropCommandBase);
 
@@ -44,7 +44,7 @@ private:
   virtual void HandleImportedTarget(const std::string &tgt);
   virtual void HandleMissingTarget(const std::string &name);
 
-  virtual bool HandleDirectContent(cmTarget *tgt,
+  virtual void HandleDirectContent(cmTarget *tgt,
                                    const std::vector<std::string> &content,
                                    bool prepend, bool system);
   virtual std::string Join(const std::vector<std::string> &content);
