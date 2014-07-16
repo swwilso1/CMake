@@ -1457,6 +1457,49 @@ void cmLocalGenerator::AddCompileOptions(
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AddLinkOptions(
+  std::string& flags, cmTarget* target,
+  const std::string& config
+  )
+{
+  if(target->GetType() == cmTarget::OBJECT_LIBRARY ||
+     target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    this->GetStaticLibraryFlags(flags,
+                                cmSystemTools::UpperCase(config),
+                                target);
+    }
+
+  // Use all flags.
+  if(const char* targetFlags = target->GetProperty("LINK_FLAGS"))
+    {
+    // LINK_FLAGS are not escaped for historical reasons.
+    this->AppendFlags(flags, targetFlags);
+    }
+
+  // Get flags for the configuration.
+  std::string flagsNameWithConfig = std::string("LINK_FLAGS");
+  std::string theConfig(config);
+  std::transform(theConfig.begin(), theConfig.end(),
+    theConfig.begin(), toupper);
+  flagsNameWithConfig += "_" + theConfig;
+  if(const char *targetFlagsForConfig =
+    target->GetProperty(flagsNameWithConfig.c_str()))
+    {
+    this->AppendFlags(flags, targetFlagsForConfig);
+    }
+
+  std::vector<std::string> opts;
+  target->GetLinkOptions(opts, config);
+  for(std::vector<std::string>::const_iterator i = opts.begin();
+      i != opts.end(); ++i)
+    {
+    // LINK_OPTIONS are escaped.
+    this->AppendFlagEscape(flags, i->c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const char* lang,
