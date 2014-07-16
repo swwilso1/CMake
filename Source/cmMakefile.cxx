@@ -884,6 +884,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
                                      cmTarget::CustomCommandType type,
                                      const char* comment,
                                      const char* workingDir,
+                                     const std::string& configName,
                                      bool escapeOldStyle) const
 {
   // Find the target to which to add the custom command.
@@ -937,7 +938,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(this, no_output, depends,
-                     commandLines, comment, workingDir);
+                     commandLines, comment, workingDir, configName);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
   switch(type)
@@ -962,6 +963,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment,
                                      const char* workingDir,
+                                     const std::string& configName,
                                      bool replace,
                                      bool escapeOldStyle)
 {
@@ -996,7 +998,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     if(file && file->GetCustomCommand() && !replace)
       {
       // The main dependency already has a custom command.
-      if(commandLines == file->GetCustomCommand()->GetCommandLines())
+      if(commandLines == file->GetCustomCommand()->GetCommandLines(configName))
         {
         // The existing custom command is identical.  Silently ignore
         // the duplicate.
@@ -1030,7 +1032,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     if(file && file->GetCustomCommand() && !replace)
       {
       // The rule file already exists.
-      if(commandLines != file->GetCustomCommand()->GetCommandLines())
+      if(commandLines != file->GetCustomCommand()->GetCommandLines(configName))
         {
         cmSystemTools::Error("Attempt to add a custom rule to output \"",
                              outName.c_str(),
@@ -1066,7 +1068,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     {
     cmCustomCommand* cc =
       new cmCustomCommand(this, outputs, depends2, commandLines,
-                          comment, workingDir);
+                          comment, workingDir, configName);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
@@ -1116,6 +1118,7 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment,
                                      const char* workingDir,
+                                     const std::string& configName,
                                      bool replace,
                                      bool escapeOldStyle)
 {
@@ -1123,7 +1126,7 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
   outputs.push_back(output);
   return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
                                         commandLines, comment, workingDir,
-                                        replace, escapeOldStyle);
+                                        configName, replace, escapeOldStyle);
 }
 
 //----------------------------------------------------------------------------
@@ -1133,7 +1136,8 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
                                      const std::vector<std::string>& depends,
                                      const char* source,
                                      const cmCustomCommandLines& commandLines,
-                                     const char* comment)
+                                     const char* comment,
+                                     const std::string& configName)
 {
   // Translate the old-style signature to one of the new-style
   // signatures.
@@ -1143,7 +1147,8 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
     // same then it added a post-build rule to the target.  Preserve
     // this behavior.
     this->AddCustomCommandToTarget(target, depends, commandLines,
-                                   cmTarget::POST_BUILD, comment, 0);
+                                   cmTarget::POST_BUILD, comment, 0,
+                                   configName);
     return;
     }
 
@@ -1163,7 +1168,8 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       {
       // The source looks like a real file.  Use it as the main dependency.
       sf = this->AddCustomCommandToOutput(output, depends, source,
-                                          commandLines, comment, 0);
+                                          commandLines, comment, 0,
+                                          configName);
       }
     else
       {
@@ -1172,7 +1178,8 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       std::vector<std::string> depends2 = depends;
       depends2.push_back(source);
       sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                          commandLines, comment, 0);
+                                          commandLines, comment, 0,
+                                          configName);
       }
 
     // If the rule was added to the source (and not a .rule file),
@@ -1239,7 +1246,8 @@ cmMakefile::AddUtilityCommand(const char* utilityName,
                               const char* workingDirectory,
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
-                              bool escapeOldStyle, const char* comment)
+                              bool escapeOldStyle, const char* comment,
+                              const std::string& configName)
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
@@ -1263,7 +1271,7 @@ cmMakefile::AddUtilityCommand(const char* utilityName,
   this->AddCustomCommandToOutput(force.c_str(), depends,
                                  no_main_dependency,
                                  commandLines, comment,
-                                 workingDirectory, no_replace,
+                                 workingDirectory, configName, no_replace,
                                  escapeOldStyle);
   cmSourceFile* sf = target->AddSource(force.c_str());
 

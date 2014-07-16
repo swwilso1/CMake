@@ -1025,10 +1025,11 @@ cmLocalUnixMakefileGenerator3
 
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
-  for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
+  for(unsigned int c = 0; c < ccg.GetNumberOfCommands(
+    this->ConfigurationName); ++c)
     {
     // Build the command line in a single string.
-    std::string cmd = ccg.GetCommand(c);
+    std::string cmd = ccg.GetCommand(c, this->ConfigurationName);
     if (cmd.size())
       {
       // Use "call " before any invocations of .bat or .cmd files
@@ -1069,7 +1070,7 @@ cmLocalUnixMakefileGenerator3
         this->MakeLauncher(cc, target, workingDir? NONE : START_OUTPUT);
       cmd = launcher + this->ConvertShellCommand(cmd, NONE);
 
-      ccg.AppendArguments(c, cmd);
+      ccg.AppendArguments(c, cmd, this->ConfigurationName);
       if(content)
         {
         // Rule content does not include the launcher.

@@ -28,6 +28,7 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Outputs(r.Outputs),
   Depends(r.Depends),
   CommandLines(r.CommandLines),
+  ConfigurationCommandLines(r.ConfigurationCommandLines),
   HaveComment(r.HaveComment),
   Comment(r.Comment),
   WorkingDirectory(r.WorkingDirectory),
@@ -48,6 +49,7 @@ cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
   this->Outputs = r.Outputs;
   this->Depends = r.Depends;
   this->CommandLines = r.CommandLines;
+  this->ConfigurationCommandLines = r.ConfigurationCommandLines;
   this->HaveComment = r.HaveComment;
   this->Comment = r.Comment;
   this->WorkingDirectory = r.WorkingDirectory;
@@ -69,10 +71,10 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
-                                 const char* workingDirectory):
+                                 const char* workingDirectory,
+                                 const std::string& configName):
   Outputs(outputs),
   Depends(depends),
-  CommandLines(commandLines),
   HaveComment(comment?true:false),
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:""),
@@ -80,6 +82,10 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   EscapeOldStyle(true),
   Backtrace(new cmListFileBacktrace)
 {
+  if(configName.empty())
+    CommandLines = commandLines;
+  else
+    this->ConfigurationCommandLines[configName] = commandLines;
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
   if(mf)
@@ -117,8 +123,18 @@ const std::vector<std::string>& cmCustomCommand::GetDepends() const
 }
 
 //----------------------------------------------------------------------------
-const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
+const cmCustomCommandLines& cmCustomCommand::GetCommandLines(const
+  std::string& configName) const
 {
+  if(configName.empty())
+    return this->CommandLines;
+
+  std::map<std::string, cmCustomCommandLines>::const_iterator ci =
+   this->ConfigurationCommandLines.find(configName);
+  if(ci != this->ConfigurationCommandLines.end())
+    {
+      return ci->second;
+    }
   return this->CommandLines;
 }
 
@@ -130,13 +146,27 @@ const char* cmCustomCommand::GetComment() const
 }
 
 //----------------------------------------------------------------------------
-void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
+void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines,
+  const std::string& configName)
 {
-  for(cmCustomCommandLines::const_iterator i=commandLines.begin();
-      i != commandLines.end(); ++i)
+  if(configName.empty())
     {
-    this->CommandLines.push_back(*i);
+    for(cmCustomCommandLines::const_iterator i=commandLines.begin();
+        i != commandLines.end(); ++i)
+      {
+      this->CommandLines.push_back(*i);
+      }
+    return;
     }
+
+  cmCustomCommandLines configLines =
+    this->ConfigurationCommandLines[configName];
+  for(cmCustomCommandLines::const_iterator ci = commandLines.begin();
+    ci != commandLines.end(); ci++)
+    {
+      configLines.push_back(*ci);
+    }
+  this->ConfigurationCommandLines[configName] = configLines;
 }
 
 //----------------------------------------------------------------------------
@@ -177,6 +207,30 @@ void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
 cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
 {
   return *this->Backtrace;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::HasCommandLines(const std::string& configName) const
+{
+  if(configName.empty())
+    {
+    if(! this->CommandLines.empty())
+      return true;
+    return false;
+    }
+
+
+  if(! this->ConfigurationCommandLines.empty())
+  {
+    for(std::map<std::string,cmCustomCommandLines>::const_iterator ci =
+      this->ConfigurationCommandLines.begin(); ci !=
+      this->ConfigurationCommandLines.end(); ci++)
+      {
+        if(configName == ci->first && (! ci->second.empty()))
+          return true;
+      }
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------

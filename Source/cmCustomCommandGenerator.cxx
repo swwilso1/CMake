@@ -32,18 +32,28 @@ cmCustomCommandGenerator::~cmCustomCommandGenerator()
 }
 
 //----------------------------------------------------------------------------
-unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
+unsigned int cmCustomCommandGenerator::GetNumberOfCommands(
+  const std::string& configName) const
 {
-  return static_cast<unsigned int>(this->CC.GetCommandLines().size());
+  if(configName.empty())
+    return static_cast<unsigned int>(this->CC.GetCommandLines().size());
+  else
+    {
+    return static_cast<unsigned int>(
+      this->CC.GetCommandLines(configName).size());
+    }
 }
 
 //----------------------------------------------------------------------------
-std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
+std::string cmCustomCommandGenerator::GetCommand(unsigned int c,
+  const std::string& configName) const
 {
-  std::string const& argv0 = this->CC.GetCommandLines()[c][0];
+  std::string const& argv0 = configName.empty() ?
+    this->CC.GetCommandLines()[c][0] :
+    this->CC.GetCommandLines(configName)[c][0];
   cmTarget* target = this->Makefile->FindTargetToUse(argv0);
   if(target && target->GetType() == cmTarget::EXECUTABLE &&
-     (target->IsImported() || !this->Makefile->IsOn("CMAKE_CROSSCOMPILING")))
+    (target->IsImported() || !this->Makefile->IsOn("CMAKE_CROSSCOMPILING")))
     {
     return target->GetLocation(this->Config);
     }
@@ -53,10 +63,13 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 //----------------------------------------------------------------------------
 void
 cmCustomCommandGenerator
-::AppendArguments(unsigned int c, std::string& cmd) const
+::AppendArguments(unsigned int c, std::string& cmd,
+  const std::string& configName) const
 {
-  cmCustomCommandLine const& commandLine = this->CC.GetCommandLines()[c];
-  for(unsigned int j=1;j < commandLine.size(); ++j)
+  cmCustomCommandLine const& commandLine = configName.empty() ?
+    this->CC.GetCommandLines()[c] :
+    this->CC.GetCommandLines(configName)[c];
+  for(unsigned int j = 1; j < commandLine.size(); ++j)
     {
     std::string arg = this->GE->Parse(commandLine[j])->Evaluate(this->Makefile,
                                                                this->Config);

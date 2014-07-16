@@ -173,6 +173,7 @@ public:
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
+                                const std::string& configName = "",
                                 bool escapeOldStyle = true) const;
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
@@ -180,6 +181,7 @@ public:
     const char* main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
+    const std::string& configName = "",
     bool replace = false,
     bool escapeOldStyle = true);
   cmSourceFile* AddCustomCommandToOutput(
@@ -188,6 +190,7 @@ public:
     const char* main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
+    const std::string& configName = "",
     bool replace = false,
     bool escapeOldStyle = true);
   void AddCustomCommandOldStyle(const char* target,
@@ -195,7 +198,8 @@ public:
                                 const std::vector<std::string>& depends,
                                 const char* source,
                                 const cmCustomCommandLines& commandLines,
-                                const char* comment);
+                                const char* comment,
+                                const std::string& configName = "");
 
   /**
    * Add a define flag to the build.
@@ -235,7 +239,8 @@ public:
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
                               bool escapeOldStyle = true,
-                              const char* comment = 0);
+                              const char* comment = 0,
+                              const std::string& configName = "");
 
   /**
    * Add a link library to the build.

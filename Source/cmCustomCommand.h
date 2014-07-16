@@ -35,7 +35,8 @@ public:
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
-                  const char* workingDirectory);
+                  const char* workingDirectory,
+                  const std::string& configName = "");
 
   ~cmCustomCommand();
 
@@ -48,14 +49,16 @@ public:
   /** Get the vector that holds the list of dependencies.  */
   const std::vector<std::string>& GetDepends() const;
 
-  /** Get the list of command lines.  */
-  const cmCustomCommandLines& GetCommandLines() const;
+  /** Get the list of command lines for the configuration. */
+  const cmCustomCommandLines&
+    GetCommandLines(const std::string& configName = "") const;
 
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
-  /** Append to the list of command lines.  */
-  void AppendCommands(const cmCustomCommandLines& commandLines);
+  /** Append to the list of command lines for the configuration */
+  void AppendCommands(const cmCustomCommandLines& commandLines, const
+    std::string& configName = "");
 
   /** Append to the list of dependencies.  */
   void AppendDepends(const std::vector<std::string>& depends);
@@ -73,6 +76,11 @@ public:
   cmListFileBacktrace const& GetBacktrace() const;
 
   typedef std::pair<cmStdString, cmStdString> ImplicitDependsPair;
+
+  /** Check if the customm command has command lines for the
+    configuration. */
+  bool HasCommandLines(const std::string& configName = "") const;
+
   class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
   void SetImplicitDepends(ImplicitDependsList const&);
   void AppendImplicitDepends(ImplicitDependsList const&);
@@ -82,6 +90,7 @@ private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
+  std::map<std::string, cmCustomCommandLines> ConfigurationCommandLines;
   bool HaveComment;
   std::string Comment;
   std::string WorkingDirectory;
