@@ -803,6 +803,10 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode += ".text";
     }
+  else if(ext == "mc")
+    {
+    sourcecode += ".c";
+    }
   else if(lang == "CXX")
     {
     sourcecode += ".cpp.cpp";
