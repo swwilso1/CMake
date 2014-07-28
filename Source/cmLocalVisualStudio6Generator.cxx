@@ -250,7 +250,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   this->Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles,
                                            makefileIn.c_str(), commandLines,
                                            comment.c_str(),
-                                           no_working_directory, true);
+                                           no_working_directory, "", true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
     {
     tgt.AddSourceFile(file);

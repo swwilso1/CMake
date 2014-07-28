@@ -319,7 +319,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
      mf->AddCustomCommandToOutput(
        stamps, listFiles,
        no_main_dependency, commandLines, "Checking Build System",
-       no_working_directory, true))
+       no_working_directory, "", true))
     {
     tgt->AddSourceFile(file);
     }

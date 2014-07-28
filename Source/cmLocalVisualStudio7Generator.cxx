@@ -150,7 +150,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       if(cmSourceFile* file =
          this->Makefile->AddCustomCommandToOutput(
            force.c_str(), no_depends, no_main_dependency,
-           force_commands, " ", 0, true))
+           force_commands, " ", 0, "", true))
         {
         tgt.AddSourceFile(file);
         }
@@ -321,7 +321,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   this->Makefile->AddCustomCommandToOutput(fullpathStampName.c_str(),
                                            listFiles, makefileIn.c_str(),
                                            commandLines, comment.c_str(),
-                                           no_working_directory, true);
+                                           no_working_directory, "", true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
     {
     return file;
