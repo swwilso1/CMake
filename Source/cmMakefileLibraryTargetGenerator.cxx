@@ -176,9 +176,6 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
 
-  this->LocalGenerator->AddLinkOptions(extraFlags,
-    this->Target, this->ConfigName);
-
   this->AddModuleDefinitionFlag(extraFlags);
 
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
