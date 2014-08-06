@@ -845,6 +845,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"\n";
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
+  targetOptions.OutputUndefinePreprocessorDefinitions(fout, "\t\t\t\t",
+    "\n", "CXX");
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   tool = "VCCustomBuildTool";
@@ -868,6 +870,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // add the -D flags to the RC tool
   fout << "\"";
   targetOptions.OutputPreprocessorDefinitions(fout, "\n\t\t\t\t", "", "RC");
+  targetOptions.OutputUndefinePreprocessorDefinitions(fout, "\n\t\t\t\t",
+    "", "RC");
   fout << "/>\n";
   tool = "VCMIDLTool";
   if(this->FortranProject)
@@ -1737,6 +1741,9 @@ bool cmLocalVisualStudio7Generator
             fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
             fileOptions.OutputPreprocessorDefinitions(fout,
+                                                      "\t\t\t\t\t", "\n",
+                                                      lang);
+            fileOptions.OutputUndefinePreprocessorDefinitions(fout,
                                                       "\t\t\t\t\t", "\n",
                                                       lang);
             }

@@ -1185,6 +1185,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream,
                                               "      ", "\n", lang);
+      clOptions.OutputUndefinePreprocessorDefinitions(*this->BuildFileStream,
+                                              "      ", "\n", lang);
       }
     }
   return hasFlags;
@@ -1426,6 +1428,8 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
+  clOptions.OutputUndefinePreprocessorDefinitions(*this->BuildFileStream,
+                                "      ", "\n", "CXX");
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
   this->WriteString("</ClCompile>\n", 2);
 }
@@ -1455,6 +1459,8 @@ WriteRCOptions(std::string const& configName,
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "RC");
+  clOptions.OutputUndefinePreprocessorDefinitions(*this->BuildFileStream,
+                                "      ", "\n", "RC");
   this->OutputIncludes(includes);
   this->WriteString("</ResourceCompile>\n", 2);
 }

@@ -17,7 +17,9 @@
 cmIDEOptions::cmIDEOptions()
 {
   this->DoingDefine = false;
+  this->DoingUndefine = false;
   this->AllowDefine = true;
+  this->AllowUndefine = true;
   this->AllowSlash = false;
   for(int i=0; i < FlagTableCount; ++i)
     {
@@ -41,6 +43,13 @@ void cmIDEOptions::HandleFlag(const char* flag)
     return;
     }
 
+  if(this->DoingUndefine)
+    {
+    this->DoingUndefine = false;
+    this->Undefines.push_back(flag);
+    return;
+    }
+
   // Look for known arguments.
   if(flag[0] == '-' || (this->AllowSlash && flag[0] == '/'))
     {
@@ -59,6 +68,21 @@ void cmIDEOptions::HandleFlag(const char* flag)
         }
       return;
       }
+
+  // Look for preprocessor undefines
+  else if(this->AllowUndefine && flag[1] == 'U')
+    {
+    if(flag[2] == '\0')
+      {
+      // The next argument will have the value to undefine.
+      this->DoingUndefine = true;
+      }
+    else
+      {
+      this->Undefines.push_back(flag + 2);
+      }
+    return;
+    }
 
     // Look through the available flag tables.
     bool flag_handled = false;
