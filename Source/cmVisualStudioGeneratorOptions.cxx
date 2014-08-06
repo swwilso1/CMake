@@ -43,6 +43,9 @@ cmVisualStudioGeneratorOptions
   // Preprocessor definitions are not allowed for linker tools.
   this->AllowDefine = (tool != Linker);
 
+  // Preprocess undefines are not allowed for linker tools.
+  this->AllowUndefine = (tool != Linker);
+
   // Slash options are allowed for VS.
   this->AllowSlash = true;
 
@@ -286,6 +289,86 @@ cmVisualStudioGeneratorOptions
   if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     fout <<  ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
+    }
+  else
+    {
+    fout << "\"" << suffix;
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmVisualStudioGeneratorOptions
+::OutputUndefinePreprocessorDefinitions(std::ostream& fout,
+                                             const char *prefix,
+                                             const char *suffix,
+                                             const char *lang)
+{
+  if(this->Undefines.empty())
+    {
+    return;
+    }
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+    {
+    // if there are configuration specific flags, then
+    // use the configuration specific tag for UndefinePreprocessorDefinitions
+    if(this->Configuration.size())
+      {
+      fout << prefix;
+      this->TargetGenerator->WritePlatformConfigTag(
+        "UndefinePreprocessorDefinitions",
+        this->Configuration.c_str(),
+        0,
+        0, 0, &fout);
+      }
+    else
+      {
+      fout << prefix << "<UndefinePreprocessorDefinitions>";
+      }
+    }
+  else
+    {
+    fout << prefix <<  "UndefinePreprocessorDefinitions=\"";
+    }
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator di = this->Undefines.begin();
+      di != this->Undefines.end(); ++di)
+    {
+    // Escape the definition for the compiler.
+    std::string undefine;
+    if(this->Version < cmLocalVisualStudioGenerator::VS10)
+      {
+      undefine =
+        this->LocalGenerator->EscapeForShell(di->c_str(), true);
+      }
+    else
+      {
+      undefine = *di;
+      }
+    // Escape this flag for the IDE.
+    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+      {
+      undefine = cmVisualStudio10GeneratorOptionsEscapeForXML(
+        undefine.c_str());
+
+      if(0 == strcmp(lang, "RC"))
+        {
+        cmSystemTools::ReplaceString(undefine, "\"", "\\\"");
+        }
+      }
+    else
+      {
+      undefine = cmVisualStudioGeneratorOptionsEscapeForXML(undefine.c_str());
+      }
+    // Store the flag in the project file.
+    fout << sep << undefine;
+    sep = ";";
+    }
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+    {
+    fout <<
+      ";%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>"
+      << suffix;
     }
   else
     {

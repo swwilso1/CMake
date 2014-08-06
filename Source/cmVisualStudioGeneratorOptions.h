@@ -56,6 +56,11 @@ public:
                                      const char* prefix,
                                      const char* suffix,
                                      const char* lang);
+  // Write undefine options to output.
+  void OutputUndefinePreprocessorDefinitions(std::ostream& fout,
+                                             const char *prefix,
+                                             const char *suffix,
+                                             const char *lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
   void OutputAdditionalOptions(std::ostream& fout,
                                const char* prefix,
