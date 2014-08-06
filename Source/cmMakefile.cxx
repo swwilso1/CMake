@@ -1031,12 +1031,30 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     file = this->GetSource(outName.c_str());
     if(file && file->GetCustomCommand() && !replace)
       {
-      // The rule file already exists.
-      if(commandLines != file->GetCustomCommand()->GetCommandLines(configName))
+      // Get the custom command.
+      cmCustomCommand *cc = file->GetCustomCommand();
+      bool reportCustomRuleError = false;
+
+      if(! configName.empty())
+        {
+        if(cc->HasCommandLines(configName))
+          {
+          if(commandLines != cc->GetCommandLines(configName))
+            reportCustomRuleError = true;
+          }
+        else
+          cc->AppendCommands(commandLines, configName);
+        }
+      else
+        {
+        if(commandLines != cc->GetCommandLines())
+          reportCustomRuleError = true;
+        }
+
+      if(reportCustomRuleError)
         {
         cmSystemTools::Error("Attempt to add a custom rule to output \"",
-                             outName.c_str(),
-                             "\" which already has a custom rule.");
+          outName.c_str(), "\" which already has a custom rule.");
         }
       return file;
       }
