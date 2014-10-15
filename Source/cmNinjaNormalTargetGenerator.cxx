@@ -457,12 +457,18 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   std::string frameworkPath;
   std::string linkPath;
-  this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
-                                            vars["FLAGS"],
-                                            vars["LINK_FLAGS"],
-                                            frameworkPath,
-                                            linkPath,
-                                            this->GetGeneratorTarget());
+  cmGeneratorTarget& genTarget = *this->GetGeneratorTarget();
+
+  cmLocalNinjaGenerator& localGen = *this->GetLocalGenerator();
+  localGen.GetTargetFlags(vars["LINK_LIBRARIES"],
+                          vars["FLAGS"],
+                          vars["LINK_FLAGS"],
+                          frameworkPath,
+                          linkPath,
+                          &genTarget);
+
+  localGen.AddLinkOptions(
+    vars["LINK_FLAGS"], this->GetTarget(), this->GetConfigName());
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", this->GetTarget(), vars);
 

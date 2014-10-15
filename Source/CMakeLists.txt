@@ -304,6 +304,7 @@ set_property(SOURCE cmTargetPropCommandBase.cxx PROPERTY HEADER_FILE_ONLY ON)
 set(NEW_COMMANDS "")
 foreach(command_file
     cmAddCompileOptionsCommand
+    cmAddLinkOptionsCommand
     cmAuxSourceDirectoryCommand
     cmBuildNameCommand
     cmCMakeHostSystemInformationCommand
@@ -324,6 +325,7 @@ foreach(command_file
     cmSubdirDependsCommand
     cmTargetCompileDefinitionsCommand
     cmTargetCompileOptionsCommand
+    cmTargetLinkOptionsCommand
     cmTargetIncludeDirectoriesCommand
     cmUseMangledMesaCommand
     cmUtilitySourceCommand
